@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="6" passed="6">
+  <reporter-output>
+  </reporter-output>
+  <suite name="CentralActivityEngine_viewfunction full test suite" duration-ms="3953" started-at="2013-04-26T13:40:29Z" finished-at="2013-04-26T13:40:33Z">
+    <groups>
+    </groups>
+    <test name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase" duration-ms="1172" started-at="2013-04-26T13:40:29Z" finished-at="2013-04-26T13:40:30Z">
+      <class name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase">
+        <test-method status="PASS" signature="testConnectProcessSpace()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase@1f6226]" name="testConnectProcessSpace" duration-ms="1154" started-at="2013-04-26T21:40:29Z" finished-at="2013-04-26T21:40:30Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testConnectProcessSpace -->
+        <test-method status="PASS" signature="testCreateHistoricProcessStep()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase@1f6226]" name="testCreateHistoricProcessStep" duration-ms="2" started-at="2013-04-26T21:40:30Z" finished-at="2013-04-26T21:40:30Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testCreateHistoricProcessStep -->
+        <test-method status="PASS" signature="testCreateProcessObject()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase@1f6226]" name="testCreateProcessObject" duration-ms="2" started-at="2013-04-26T21:40:30Z" finished-at="2013-04-26T21:40:30Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testCreateProcessObject -->
+        <test-method status="PASS" signature="testCreateProcessStep()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase@1f6226]" name="testCreateProcessStep" duration-ms="1" started-at="2013-04-26T21:40:30Z" finished-at="2013-04-26T21:40:30Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testCreateProcessStep -->
+      </class> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase -->
+    </test> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessComponentFactoryTestCase -->
+    <test name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessLogicTestCase" duration-ms="1669" started-at="2013-04-26T13:40:30Z" finished-at="2013-04-26T13:40:32Z">
+      <class name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessLogicTestCase">
+        <test-method status="PASS" signature="testProcessObjectOperation()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessLogicTestCase@16dadf9]" name="testProcessObjectOperation" duration-ms="1667" started-at="2013-04-26T21:40:30Z" finished-at="2013-04-26T21:40:32Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testProcessObjectOperation -->
+      </class> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessLogicTestCase -->
+    </test> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessLogicTestCase -->
+    <test name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessSpaceTestCase" duration-ms="1099" started-at="2013-04-26T13:40:32Z" finished-at="2013-04-26T13:40:33Z">
+      <class name="com.viewfunction.processRepository.testNGTest.TestNG_ProcessSpaceTestCase">
+        <test-method status="PASS" signature="testProcessSpaceOperation()[pri:0, instance:com.viewfunction.processRepository.testNGTest.TestNG_ProcessSpaceTestCase@bc8e1e]" name="testProcessSpaceOperation" duration-ms="1097" started-at="2013-04-26T21:40:32Z" finished-at="2013-04-26T21:40:33Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testProcessSpaceOperation -->
+      </class> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessSpaceTestCase -->
+    </test> <!-- com.viewfunction.processRepository.testNGTest.TestNG_ProcessSpaceTestCase -->
+  </suite> <!-- CentralActivityEngine_viewfunction full test suite -->
+</testng-results>

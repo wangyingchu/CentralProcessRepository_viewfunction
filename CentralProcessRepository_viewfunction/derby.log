@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Fri Apr 26 21:35:20 CST 2013:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-013e-468e-232a-0000034ad958 
+on database directory /home/wangychu/Dev_Workspace/VFBPM_Dev/CentralProcessRepository_viewfunction/processRepository with class loader sun.misc.Launcher$AppClassLoader@126b249 
+Loaded from file:/home/wangychu/Dev_Workspace/VFBPM_Dev/CentralProcessRepository_viewfunction/lib/derby-10.10.1.1.jar
+java.vendor=Sun Microsystems Inc.
+java.runtime.version=1.6.0_45-b06
+user.dir=/home/wangychu/Dev_Workspace/VFBPM_Dev/CentralProcessRepository_viewfunction
+os.name=Linux
+os.arch=i386
+os.version=3.5.0-17-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
