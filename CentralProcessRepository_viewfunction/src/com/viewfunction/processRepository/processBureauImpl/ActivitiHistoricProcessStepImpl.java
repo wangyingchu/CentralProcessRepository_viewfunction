@@ -19,7 +19,8 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 	private Date endTime;
 	private Long durationInMillis;
 	
-	public ActivitiHistoricProcessStepImpl(String stepName,String stepDefinitionKey,String stepId,String processObjectId,String processDefinitionId,String stepAssignee, Date startTime,Date endTime,Long durationInMillis){
+	public ActivitiHistoricProcessStepImpl(String stepName,String stepDefinitionKey,String stepId,String processObjectId,String processDefinitionId,String stepAssignee, Date startTime,Date endTime,Long durationInMillis,
+			String description, String parentStepId,String owner,Date dueDate){
 		this.stepName=stepName;
 		this.stepDefinitionKey=stepDefinitionKey;
 		this.stepId=stepId;
@@ -29,6 +30,9 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 		this.startTime=startTime;
 		this.endTime=endTime;
 		this.durationInMillis=durationInMillis;
+		this.stepDescription=description;
+		this.parentStepId=parentStepId;
+		this.dueDate=dueDate;
 	}
 	
 	@Override
@@ -94,21 +98,5 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 	@Override
 	public Date getEndTime() {		
 		return this.endTime;
-	}	
-	
-	public void setStepDescription(String description) {
-		this.stepDescription=description;		
-	}
-	
-	public void setParentStepId(String parentStepId) {
-		this.parentStepId=parentStepId;		
-	}
-	
-	public void setStepOwner(String owner) {
-		this.owner=owner;		
-	}
-	
-	public void setDueDate(Date dueDate) {
-		this.dueDate=dueDate;		
-	}	
+	}		
 }

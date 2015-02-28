@@ -78,7 +78,8 @@ public class ProcessComponentFactory {
 		return new ActivitiProcessStepImpl(stepName,stepDefinitionKey,stepId,processObjectId,processDefinitionId,createTime);		
 	}
 	
-	public static HistoricProcessStep createHistoricProcessStep(String stepName,String stepDefinitionKey,String stepId,String processObjectId,String processDefinitionId,String stepAssignee, Date startTime,Date endTime,Long durationInMillis){
-		return new ActivitiHistoricProcessStepImpl(stepName,stepDefinitionKey,stepId,processObjectId,processDefinitionId,stepAssignee,startTime,endTime,durationInMillis);		
+	public static HistoricProcessStep createHistoricProcessStep(String stepName,String stepDefinitionKey,String stepId,String processObjectId,String processDefinitionId,String stepAssignee, 
+			Date startTime,Date endTime,Long durationInMillis,String description, String parentStepId,String owner,Date dueDate){
+		return new ActivitiHistoricProcessStepImpl(stepName,stepDefinitionKey,stepId,processObjectId,processDefinitionId,stepAssignee,startTime,endTime,durationInMillis,description,parentStepId,owner,dueDate);		
 	}	
 }

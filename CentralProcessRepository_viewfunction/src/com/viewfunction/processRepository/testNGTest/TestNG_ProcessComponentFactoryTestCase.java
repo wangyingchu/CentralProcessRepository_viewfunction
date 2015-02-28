@@ -40,7 +40,7 @@ public class TestNG_ProcessComponentFactoryTestCase {
 	
 	@Test
 	public void testCreateHistoricProcessStep(){		
-		HistoricProcessStep _HistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep("stepName", "stepDefinitionKey", "stepId", "processObjectId", "processDefinitionId","stepAssignee",new Date(),new Date(),null);
+		HistoricProcessStep _HistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep("stepName", "stepDefinitionKey", "stepId", "processObjectId", "processDefinitionId","stepAssignee",new Date(),new Date(),null,"description","parentId","owner",new Date());
 		Assert.assertTrue(_HistoricProcessStep instanceof HistoricProcessStep,"Class Type should by ProcessStep");	
 		Assert.assertEquals(_HistoricProcessStep.getStepName(),"stepName");		
 	}

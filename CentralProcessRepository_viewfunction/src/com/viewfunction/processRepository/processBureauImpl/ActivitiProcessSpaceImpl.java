@@ -265,11 +265,13 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 			throw new ProcessRepositoryRuntimeException();
 		}		
 		List<HistoricProcessStep> _HistoricProcessStepList=new ArrayList<HistoricProcessStep>();
-		for(HistoricTaskInstance _HistoricTaskInstance:historicTaskInstanceList){			
+		for(HistoricTaskInstance _HistoricTaskInstance:historicTaskInstanceList){				
 			HistoricProcessStep currentHistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep(
 					_HistoricTaskInstance.getName(),_HistoricTaskInstance.getTaskDefinitionKey(),_HistoricTaskInstance.getId(),
 					_HistoricTaskInstance.getProcessInstanceId(),_HistoricTaskInstance.getProcessDefinitionId(),
-					_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),_HistoricTaskInstance.getDurationInMillis());
+					_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),
+					_HistoricTaskInstance.getDurationInMillis(),_HistoricTaskInstance.getDescription(),_HistoricTaskInstance.getParentTaskId(),
+					_HistoricTaskInstance.getOwner(),_HistoricTaskInstance.getDueDate());			
 			_HistoricProcessStepList.add(currentHistoricProcessStep);			
 		}		
 		return _HistoricProcessStepList;
