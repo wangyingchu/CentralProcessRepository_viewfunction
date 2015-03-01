@@ -134,6 +134,9 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		HistoryService historyService = processEngine.getHistoryService();
 		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
 		HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).singleResult();
+		if(historicProcessInstance==null){
+			return null;
+		}		
 		boolean hasFinished=historicProcessInstance.getEndTime()==null?false:true;		
 		_ProcessObject=ProcessComponentFactory.createProcessObject(historicProcessInstance.getId(),historicProcessInstance.getProcessDefinitionId(),hasFinished);
 		((ActivitiProcessObjectImpl)_ProcessObject).setProcessEngine(this.processEngine);		
