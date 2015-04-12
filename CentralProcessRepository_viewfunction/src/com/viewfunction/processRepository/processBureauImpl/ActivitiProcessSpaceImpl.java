@@ -64,7 +64,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	
 	@Override
 	public boolean addProcessDefinition(String fileName,InputStream inputStream)throws ProcessRepositoryDeploymentException {
-		if(!fileName.endsWith(".bpmn20.xml")){
+		if(!fileName.endsWith(".bpmn20.xml")&!fileName.endsWith(".bpmn")){
 			throw new ProcessRepositoryDeploymentException();
 		}
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();		
