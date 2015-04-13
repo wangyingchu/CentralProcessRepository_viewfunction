@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.repository.ProcessDefinition;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
 import com.viewfunction.processRepository.extension.StepContext;
@@ -36,7 +37,9 @@ public class ActivitiStepContextImpl implements StepContext{
 
 	@Override
 	public String getProcessType() {
-		return this.activitiDelegateExecution.getProcessBusinessKey();
+		ProcessDefinition currentProcessDefinition=this.activitiDelegateExecution.getEngineServices().getRepositoryService().getProcessDefinition(getProcessDefinitionId());
+		String processTypeName=currentProcessDefinition.getKey();
+		return processTypeName;
 	}
 
 	@Override
