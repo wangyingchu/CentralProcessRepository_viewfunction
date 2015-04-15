@@ -5,6 +5,6 @@ import com.viewfunction.processRepository.extension.StepContext;
 public class DefaultExtensionStep extends ActivitiExtensionStepImpl{
 	@Override
 	public void executeExtensionLogic(StepContext stepContext) {
-		this.setProcessVariables(stepContext.getProcessVariables());	
+		stepContext.getAllProcessVariables();			
 	}
 }

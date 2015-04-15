@@ -1,6 +1,10 @@
 package com.viewfunction.processRepository.extensionImpl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -60,10 +64,67 @@ public class ActivitiStepContextImpl implements StepContext{
 	@Override
 	public String getProcessObjectId() {
 		return this.activitiDelegateExecution.getProcessInstanceId();
+	}	
+	
+	@Override
+	public List<String> getProcessVariableNames() {
+		List<String> variableNamesList=new ArrayList<String>();		
+		Set<String> variableNamesSet=this.activitiDelegateExecution.getVariableNames();
+		Iterator<String> variableIterator=variableNamesSet.iterator();		
+		while (variableIterator.hasNext()){
+			String variableName=variableIterator.next();
+			variableNamesList.add(variableName);	
+		}				
+		return variableNamesList;
 	}
 
 	@Override
-	public Map<String, Object> getProcessVariables() {
+	public Map<String, Object> getAllProcessVariables() {		
 		return this.activitiDelegateExecution.getVariables();
+	}
+
+	@Override
+	public Map<String, Object> getProcessVariables(List<String> variableNamesList) {
+		return this.activitiDelegateExecution.getVariables(variableNamesList);
+	}
+
+	@Override
+	public Object getProcessVariable(String variableName) {		
+		return this.activitiDelegateExecution.getVariable(variableName);
+	}
+
+	@Override
+	public void removeProcessVariable(String variableName) {
+		this.activitiDelegateExecution.removeVariable(variableName);		
+	}
+
+	@Override
+	public void removeProcessVariables(List<String> variableNamesList) {
+		this.activitiDelegateExecution.removeVariables(variableNamesList);		
+	}
+
+	@Override
+	public void removeAllProcessVariable() {
+		this.activitiDelegateExecution.removeVariables();		
+	}
+
+	@Override
+	public void addProcessVariable(String variableName, Object variableValue) {
+		this.activitiDelegateExecution.setVariable(variableName, variableValue);		
+	}
+
+	@Override
+	public void addProcessVariables(Map<String, Object> variables) {
+		this.activitiDelegateExecution.setVariables(variables);		
+	}
+
+	@Override
+	public boolean hasProcessVariables() {		
+		return this.activitiDelegateExecution.hasVariables();
+	}
+
+	@Override
+	public boolean hasProcessVariable(String variableName) {		
+		return this.activitiDelegateExecution.hasVariable(variableName);
 	}
 }
