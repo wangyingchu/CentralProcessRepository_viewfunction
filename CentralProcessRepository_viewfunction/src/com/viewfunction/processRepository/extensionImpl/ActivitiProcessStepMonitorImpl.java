@@ -6,7 +6,7 @@ import org.activiti.engine.delegate.TaskListener;
 
 import com.viewfunction.processRepository.extension.ProcessStepMonitor;
 import com.viewfunction.processRepository.extension.StepContext;
-import com.viewfunction.processRepository.extension.StepStatusHandler;
+import com.viewfunction.processRepository.extension.StepRouteSettingHandler;
 
 public abstract class ActivitiProcessStepMonitorImpl implements ProcessStepMonitor,TaskListener {
 
@@ -16,36 +16,36 @@ public abstract class ActivitiProcessStepMonitorImpl implements ProcessStepMonit
 	public void notify(DelegateTask delegateTask) {
 		DelegateExecution delegateExecution=delegateTask.getExecution();
 		StepContext stepContext=new ActivitiStepContextImpl(delegateExecution);
-		StepStatusHandler stepStatusHandler=new ActivitiStepStatusHandlerImpl(delegateTask);		
+		StepRouteSettingHandler stepRouteSettingHandler=new ActivitiStepRouteSettingHandlerImpl(delegateTask);		
 		String eventName=delegateTask.getEventName();
 		
 		if(TaskListener.EVENTNAME_ASSIGNMENT.equals(eventName)){
-			executeStepAssignMonitorLogic(stepContext,stepStatusHandler);
+			executeStepAssignMonitorLogic(stepContext,stepRouteSettingHandler);
 		}
 		if(TaskListener.EVENTNAME_COMPLETE.equals(eventName)){
-			executeStepCompleteMonitorLogic(stepContext,stepStatusHandler);
+			executeStepCompleteMonitorLogic(stepContext,stepRouteSettingHandler);
 		}
 		if(TaskListener.EVENTNAME_CREATE.equals(eventName)){
-			executeStepCreateMonitorLogic(stepContext,stepStatusHandler);
+			executeStepCreateMonitorLogic(stepContext,stepRouteSettingHandler);
 		}
 		if(TaskListener.EVENTNAME_DELETE.equals(eventName)){
-			executeStepDeleteMonitorLogic(stepContext,stepStatusHandler);
+			executeStepDeleteMonitorLogic(stepContext,stepRouteSettingHandler);
 		}		
-		executeGeneralMonitorLogic(stepContext,stepStatusHandler);
+		executeGeneralMonitorLogic(stepContext,stepRouteSettingHandler);
 	}
 	
 	@Override
-	public abstract void executeGeneralMonitorLogic(StepContext stepContext,StepStatusHandler stepStatusHandler);
+	public abstract void executeGeneralMonitorLogic(StepContext stepContext,StepRouteSettingHandler stepRouteSettingHandler);
 	
 	@Override
-	public abstract void executeStepAssignMonitorLogic(StepContext stepContext,StepStatusHandler stepStatusHandler);
+	public abstract void executeStepAssignMonitorLogic(StepContext stepContext,StepRouteSettingHandler stepRouteSettingHandler);
 	
 	@Override
-	public abstract void executeStepCompleteMonitorLogic(StepContext stepContext,StepStatusHandler stepStatusHandler);
+	public abstract void executeStepCompleteMonitorLogic(StepContext stepContext,StepRouteSettingHandler stepRouteSettingHandler);
 	
 	@Override
-	public abstract void executeStepCreateMonitorLogic(StepContext stepContext,StepStatusHandler stepStatusHandler);
+	public abstract void executeStepCreateMonitorLogic(StepContext stepContext,StepRouteSettingHandler stepRouteSettingHandler);
 	
 	@Override
-	public abstract void executeStepDeleteMonitorLogic(StepContext stepContext,StepStatusHandler stepStatusHandler);
+	public abstract void executeStepDeleteMonitorLogic(StepContext stepContext,StepRouteSettingHandler stepRouteSettingHandler);
 }

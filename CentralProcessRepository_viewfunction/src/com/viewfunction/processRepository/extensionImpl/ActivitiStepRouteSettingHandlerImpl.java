@@ -10,13 +10,13 @@ import java.util.Set;
 import org.activiti.engine.delegate.DelegateTask;
 import org.activiti.engine.task.IdentityLink;
 
-import com.viewfunction.processRepository.extension.StepStatusHandler;
+import com.viewfunction.processRepository.extension.StepRouteSettingHandler;
 
-public class ActivitiStepStatusHandlerImpl implements StepStatusHandler {
+public class ActivitiStepRouteSettingHandlerImpl implements StepRouteSettingHandler {
 	
 	private DelegateTask delegateTask;
 	
-	public ActivitiStepStatusHandlerImpl(DelegateTask delegateTask){
+	public ActivitiStepRouteSettingHandlerImpl(DelegateTask delegateTask){
 		this.delegateTask=delegateTask;
 		//delegateTask.getDelegationState();
 	}

@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface StepStatusHandler {
+public interface StepRouteSettingHandler {
 	public String getStepAssignee();
 	public void setStepAssignee(String assignee);	
 	public String getStepDescription();

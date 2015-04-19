@@ -47,7 +47,7 @@ public class ActivitiStepContextImpl implements StepContext{
 	}
 
 	@Override
-	public String getProcessStepName() {
+	public String getProcessStepName() {	
 		return this.activitiDelegateExecution.getCurrentActivityName();
 	}
 
