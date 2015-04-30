@@ -195,9 +195,24 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	
 	private List<ProcessStep> createProcessStepList(List<Task> taskList){
 		ArrayList<ProcessStep> processStepList=new ArrayList<ProcessStep>();
-		for(Task currentTask:taskList){				
-			ProcessStep currentStep=ProcessComponentFactory.createProcessStep(currentTask.getName(),currentTask.getTaskDefinitionKey(), currentTask.getId(), currentTask.getProcessInstanceId(), currentTask.getProcessDefinitionId(), currentTask.getCreateTime());
-			((ActivitiProcessStepImpl)currentStep).setProcessEngine(this.processEngine);			
+		for(Task currentTask:taskList){	
+			String stepDefinitionKey=null;			
+			String processObjectId=null;
+			String processDefinitionId=null;			
+			if(currentTask.getParentTaskId()!=null){
+				//should use parent task's process info to build process data				
+				HistoryService historyService=this.processEngine.getHistoryService();				
+				HistoricTaskInstance parentTask=historyService.createHistoricTaskInstanceQuery().taskId(currentTask.getParentTaskId()).singleResult();				
+				stepDefinitionKey=parentTask.getTaskDefinitionKey();
+				processObjectId=parentTask.getProcessInstanceId();
+				processDefinitionId=parentTask.getProcessDefinitionId();				
+			}else{
+				stepDefinitionKey=currentTask.getTaskDefinitionKey();
+				processObjectId=currentTask.getProcessInstanceId();
+				processDefinitionId=currentTask.getProcessDefinitionId();				
+			}			
+			ProcessStep currentStep=ProcessComponentFactory.createProcessStep(currentTask.getName(),stepDefinitionKey, currentTask.getId(),processObjectId,processDefinitionId, currentTask.getCreateTime());
+			((ActivitiProcessStepImpl)currentStep).setProcessEngine(this.processEngine);	
 			if(currentTask.getAssignee()!=null){
 				currentStep.setStepAssignee(currentTask.getAssignee());				
 			}
@@ -268,14 +283,28 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 			throw new ProcessRepositoryRuntimeException();
 		}		
 		List<HistoricProcessStep> _HistoricProcessStepList=new ArrayList<HistoricProcessStep>();
-		for(HistoricTaskInstance _HistoricTaskInstance:historicTaskInstanceList){				
-			HistoricProcessStep currentHistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep(
-					_HistoricTaskInstance.getName(),_HistoricTaskInstance.getTaskDefinitionKey(),_HistoricTaskInstance.getId(),
-					_HistoricTaskInstance.getProcessInstanceId(),_HistoricTaskInstance.getProcessDefinitionId(),
-					_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),
-					_HistoricTaskInstance.getDurationInMillis(),_HistoricTaskInstance.getDescription(),_HistoricTaskInstance.getParentTaskId(),
-					_HistoricTaskInstance.getOwner(),_HistoricTaskInstance.getDueDate());			
-			_HistoricProcessStepList.add(currentHistoricProcessStep);			
+		for(HistoricTaskInstance _HistoricTaskInstance:historicTaskInstanceList){			
+			String parentTaskId=_HistoricTaskInstance.getParentTaskId();
+			if(parentTaskId!=null){
+				HistoricTaskInstance parentHistoricTaskInstance=historyService.createHistoricTaskInstanceQuery().taskId(parentTaskId).singleResult();				
+				HistoricProcessStep currentHistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep(
+						_HistoricTaskInstance.getName(),parentHistoricTaskInstance.getTaskDefinitionKey(),_HistoricTaskInstance.getId(),
+						parentHistoricTaskInstance.getProcessInstanceId(),parentHistoricTaskInstance.getProcessDefinitionId(),
+						_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),
+						_HistoricTaskInstance.getDurationInMillis(),_HistoricTaskInstance.getDescription(),_HistoricTaskInstance.getParentTaskId(),
+						_HistoricTaskInstance.getOwner(),_HistoricTaskInstance.getDueDate());				
+				((ActivitiHistoricProcessStepImpl)currentHistoricProcessStep).setProcessEngine(processEngine);				
+				_HistoricProcessStepList.add(currentHistoricProcessStep);							
+			}else{
+				HistoricProcessStep currentHistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep(
+						_HistoricTaskInstance.getName(),_HistoricTaskInstance.getTaskDefinitionKey(),_HistoricTaskInstance.getId(),
+						_HistoricTaskInstance.getProcessInstanceId(),_HistoricTaskInstance.getProcessDefinitionId(),
+						_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),
+						_HistoricTaskInstance.getDurationInMillis(),_HistoricTaskInstance.getDescription(),_HistoricTaskInstance.getParentTaskId(),
+						_HistoricTaskInstance.getOwner(),_HistoricTaskInstance.getDueDate());		
+				((ActivitiHistoricProcessStepImpl)currentHistoricProcessStep).setProcessEngine(processEngine);
+				_HistoricProcessStepList.add(currentHistoricProcessStep);							
+			}			
 		}		
 		return _HistoricProcessStepList;
 	}

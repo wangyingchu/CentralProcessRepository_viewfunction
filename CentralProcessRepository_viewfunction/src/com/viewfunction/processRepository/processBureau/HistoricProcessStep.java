@@ -1,6 +1,7 @@
 package com.viewfunction.processRepository.processBureau;
 
 import java.util.Date;
+import java.util.List;
 
 public interface HistoricProcessStep {
 	public String getStepName();
@@ -17,4 +18,8 @@ public interface HistoricProcessStep {
 	public Date getDueDate();	
 	public Long getDurationInMillis();
 	public Date getEndTime(); 	
+	
+	public boolean hasParentStep();
+	public boolean hasChildStep();
+	public List<HistoricProcessStep> getChildProcessSteps();
 }

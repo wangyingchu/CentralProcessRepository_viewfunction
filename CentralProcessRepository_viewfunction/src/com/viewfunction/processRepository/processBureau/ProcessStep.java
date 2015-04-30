@@ -23,6 +23,9 @@ public interface ProcessStep {
 	public String getParentStepId();	
 	public void setParentStepId(String parentStepId);
 	
+	public boolean hasParentStep();
+	public boolean hasChildStep();
+	
 	public String getStepOwner();	
 	public void setStepOwner(String owner);		
 	
@@ -38,4 +41,11 @@ public interface ProcessStep {
 	
 	public void addComment(ProcessComment processComment);
 	public List<ProcessComment> getComments();
+	
+	public ProcessStep createChildProcessStep(String childStepAssignee,String childStepName,String childStepDescription,Date childStepDueDate);
+	public boolean deleteChildProcessStepByStepId(String childStepId);
+	public boolean deleteChildProcessSteps();
+	public List<ProcessStep> getChildProcessSteps();
+	public boolean isAllChildProcessStepsFinished();
+	
 }

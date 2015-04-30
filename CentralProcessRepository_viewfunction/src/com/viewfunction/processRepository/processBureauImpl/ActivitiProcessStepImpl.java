@@ -227,6 +227,10 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 
 	@Override
 	public boolean returnCurrentStep() throws ProcessRepositoryRuntimeException {
+		if(hasParentStep()){
+			//don't allow return a child process step
+			throw new ProcessRepositoryRuntimeException();			
+		}		
 		TaskService taskService = this.processEngine.getTaskService();		
 		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();
 		if(currentTask==null){
@@ -247,5 +251,140 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		taskService.delegateTask(this.stepId, newUserId);
 		taskService.setOwner(this.stepId, newTaskOwner);		
 		return true;
+	}
+
+	@Override
+	public ProcessStep createChildProcessStep(String childStepAssignee,String childStepName,String childStepDescription,Date childSteDdueDate) {		
+		TaskService taskService = this.processEngine.getTaskService();
+		Task childTask = taskService.newTask();
+		childTask.setAssignee(childStepAssignee);		
+		if(this.getStepAssignee()!=null){
+			childTask.setOwner(getStepAssignee());			
+		}
+		childTask.setParentTaskId(getStepId()); 
+		childTask.setName(childStepName);
+		childTask.setDescription(childStepDescription);		
+		if(childSteDdueDate!=null){
+			childTask.setDueDate(childSteDdueDate);
+		}else{
+			childTask.setDueDate(getDueDate());
+		}		
+		taskService.saveTask(childTask);			
+		String childProcessStepId=childTask.getId();
+		Date createTime=childTask.getCreateTime();		
+		ProcessStep childProcessStep=new ActivitiProcessStepImpl(childStepName,getStepDefinitionKey(),childProcessStepId,getProcessObjectId(),getProcessDefinitionId(),createTime);				
+		if(childTask.getParentTaskId()!=null){
+			childProcessStep.setParentStepId(childTask.getParentTaskId());
+		}			
+		if(childTask.getAssignee()!=null){
+			childProcessStep.setStepAssignee(childTask.getAssignee());
+		}			
+		if(childTask.getDescription()!=null){
+			childProcessStep.setStepDescription(childTask.getDescription());
+		}			
+		if(childTask.getOwner()!=null){
+			childProcessStep.setStepOwner(childTask.getOwner());
+		}			
+		if(childTask.getDueDate()!=null){
+			childProcessStep.setDueDate(childTask.getDueDate());
+		}			
+		return childProcessStep;
+	}
+
+	@Override
+	public boolean deleteChildProcessStepByStepId(String stepId) {
+		TaskService taskService = this.processEngine.getTaskService();
+		//also delete related sub task
+		taskService.deleteTask(stepId,true);
+		List<Task> childTasks=taskService.getSubTasks(getStepId());
+		for(Task currentTask:childTasks){
+			if(currentTask.getId().equals(stepId)){
+				return false;
+			}
+		}		
+		return true;
+	}
+
+	@Override
+	public boolean deleteChildProcessSteps() {
+		TaskService taskService = this.processEngine.getTaskService();
+		List<Task> childTasks=taskService.getSubTasks(getStepId());
+		List<String> childTaskIdArray=new ArrayList<String>();
+		for(Task currentTask:childTasks){
+			childTaskIdArray.add(currentTask.getId());		
+		}
+		//also delete related sub task
+		taskService.deleteTasks(childTaskIdArray, true);			
+		childTasks=taskService.getSubTasks(getStepId());
+		if(childTasks.size()==0){
+			return true;
+		}else{
+			return false;
+		}		
+	}
+
+	@Override
+	public List<ProcessStep> getChildProcessSteps() {
+		TaskService taskService = this.processEngine.getTaskService();
+		List<Task> childTasks=taskService.getSubTasks(getStepId());
+		List<ProcessStep> childProcessStepList =new ArrayList<ProcessStep>();
+		for(Task currentTask:childTasks){
+			String stepName=currentTask.getName();
+			String childProcessStepId=currentTask.getId();			
+			Date createTime=currentTask.getCreateTime();	
+			ProcessStep childProcessStep=new ActivitiProcessStepImpl(stepName,getStepDefinitionKey(),childProcessStepId,getProcessObjectId(),getProcessDefinitionId(),createTime);	
+			if(currentTask.getParentTaskId()!=null){
+				childProcessStep.setParentStepId(currentTask.getParentTaskId());
+			}			
+			if(currentTask.getAssignee()!=null){
+				childProcessStep.setStepAssignee(currentTask.getAssignee());
+			}			
+			if(currentTask.getDescription()!=null){
+				childProcessStep.setStepDescription(currentTask.getDescription());
+			}			
+			if(currentTask.getOwner()!=null){
+				childProcessStep.setStepOwner(currentTask.getOwner());
+			}			
+			if(currentTask.getDueDate()!=null){
+				childProcessStep.setDueDate(currentTask.getDueDate());
+			}						
+			childProcessStepList.add(childProcessStep);
+		}
+		return childProcessStepList;
+	}
+
+	@Override
+	public boolean isAllChildProcessStepsFinished() {
+		TaskService taskService = this.processEngine.getTaskService();
+		List<Task> childTasks=taskService.getSubTasks(getStepId());		
+		if(childTasks.size()==0){
+			return false;
+		}
+		long finihedChildTasksNumber=this.processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskParentTaskId(getStepId()).finished().count();
+		if(finihedChildTasksNumber==childTasks.size()){
+			return true;
+		}else{
+			return false;
+		}		
+	}
+
+	@Override
+	public boolean hasParentStep() {
+		if(this.getParentStepId()!=null){
+			return true;
+		}else{
+			return false;
+		}		
+	}
+
+	@Override
+	public boolean hasChildStep() {
+		TaskService taskService = this.processEngine.getTaskService();
+		List<Task> childTasks=taskService.getSubTasks(getStepId());
+		if(childTasks.size()>0){
+			return true;
+		}else{
+			return false;
+		}		
 	}
 }

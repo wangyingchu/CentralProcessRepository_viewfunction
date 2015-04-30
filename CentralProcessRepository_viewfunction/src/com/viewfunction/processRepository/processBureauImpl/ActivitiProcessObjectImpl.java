@@ -120,6 +120,7 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 					_HistoricTaskInstance.getProcessInstanceId(),_HistoricTaskInstance.getProcessDefinitionId(),
 					_HistoricTaskInstance.getAssignee(),_HistoricTaskInstance.getStartTime(),_HistoricTaskInstance.getEndTime(),_HistoricTaskInstance.getDurationInMillis(),
 					_HistoricTaskInstance.getDescription(),_HistoricTaskInstance.getParentTaskId(),_HistoricTaskInstance.getOwner(),_HistoricTaskInstance.getDueDate());
+			((ActivitiHistoricProcessStepImpl)currentHistoricProcessStep).setProcessEngine(this.processEngine);			
 			_HistoricProcessStepList.add(currentHistoricProcessStep);			
 		}		
 		return _HistoricProcessStepList;

@@ -1,6 +1,12 @@
 package com.viewfunction.processRepository.processBureauImpl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.history.HistoricTaskInstance;
 
 import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 
@@ -18,6 +24,8 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 	private Date startTime;
 	private Date endTime;
 	private Long durationInMillis;
+	
+	private ProcessEngine processEngine;	
 	
 	public ActivitiHistoricProcessStepImpl(String stepName,String stepDefinitionKey,String stepId,String processObjectId,String processDefinitionId,String stepAssignee, Date startTime,Date endTime,Long durationInMillis,
 			String description, String parentStepId,String owner,Date dueDate){
@@ -98,5 +106,60 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 	@Override
 	public Date getEndTime() {		
 		return this.endTime;
-	}		
+	}
+
+	@Override
+	public boolean hasParentStep() {		
+		if(this.getParentStepId()!=null){
+			return true;
+		}else{
+			return false;
+		}	
+	}
+
+	@Override
+	public boolean hasChildStep() {		
+		HistoryService historyService=this.processEngine.getHistoryService();		
+		long childTaskCount=historyService.createHistoricTaskInstanceQuery().taskParentTaskId(this.stepId).count();		
+		if(childTaskCount>0){
+			return true;
+		}else{
+			return false;
+		}		
+	}
+
+	public ProcessEngine getProcessEngine() {
+		return processEngine;
+	}
+
+	public void setProcessEngine(ProcessEngine processEngine) {
+		this.processEngine = processEngine;
+	}
+
+	@Override
+	public List<HistoricProcessStep> getChildProcessSteps() {		
+		List<HistoricProcessStep> historicProcessStepList=new ArrayList<HistoricProcessStep>();
+		HistoryService historyService=this.processEngine.getHistoryService();			
+		List<HistoricTaskInstance> childHistoricTaskList= historyService.createHistoricTaskInstanceQuery().taskParentTaskId(this.stepId).orderByTaskCreateTime().asc().list();		
+		for(HistoricTaskInstance currentHistoricTaskInstance:childHistoricTaskList){
+			String stepName=currentHistoricTaskInstance.getName();			
+			String stepDefinitionKey=this.stepDefinitionKey;
+			String stepId=currentHistoricTaskInstance.getId();			
+			String processObjectId=this.processObjectId;
+			String processDefinitionId=this.processDefinitionId;
+			String stepAssignee=currentHistoricTaskInstance.getAssignee(); 			
+			Date startTime=currentHistoricTaskInstance.getStartTime();
+			Date endTime=currentHistoricTaskInstance.getClaimTime();
+			Long durationInMillis=currentHistoricTaskInstance.getDurationInMillis();
+			String description=currentHistoricTaskInstance.getDescription(); 
+			String parentStepId=currentHistoricTaskInstance.getId();
+			String owner=currentHistoricTaskInstance.getOwner();
+			Date dueDate=currentHistoricTaskInstance.getDueDate();		
+			HistoricProcessStep currentHistoricProcessStep=new			
+			 ActivitiHistoricProcessStepImpl(stepName,stepDefinitionKey,stepId,processObjectId,processDefinitionId,stepAssignee, startTime,endTime,durationInMillis,
+						description, parentStepId,owner,dueDate);			
+			historicProcessStepList.add(currentHistoricProcessStep);			
+		}		
+		return historicProcessStepList;
+	}	
 }
