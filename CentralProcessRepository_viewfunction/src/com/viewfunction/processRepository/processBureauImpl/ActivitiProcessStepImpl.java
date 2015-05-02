@@ -5,12 +5,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
+import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessComment;
 import com.viewfunction.processRepository.processBureau.ProcessStep;
 
@@ -27,6 +30,7 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 	private String processDefinitionId;
 	private Date createTime;
 	private Date dueDate;
+	private Date endTime;
 	
 	private ProcessEngine processEngine;
 	
@@ -325,31 +329,40 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 
 	@Override
 	public List<ProcessStep> getChildProcessSteps() {
-		TaskService taskService = this.processEngine.getTaskService();
-		List<Task> childTasks=taskService.getSubTasks(getStepId());
-		List<ProcessStep> childProcessStepList =new ArrayList<ProcessStep>();
-		for(Task currentTask:childTasks){
-			String stepName=currentTask.getName();
-			String childProcessStepId=currentTask.getId();			
-			Date createTime=currentTask.getCreateTime();	
-			ProcessStep childProcessStep=new ActivitiProcessStepImpl(stepName,getStepDefinitionKey(),childProcessStepId,getProcessObjectId(),getProcessDefinitionId(),createTime);	
-			if(currentTask.getParentTaskId()!=null){
-				childProcessStep.setParentStepId(currentTask.getParentTaskId());
+		List<ProcessStep> childProcessStepList =new ArrayList<ProcessStep>();				
+		HistoryService historyService=this.processEngine.getHistoryService();			
+		List<HistoricTaskInstance> childHistoricTaskList= historyService.createHistoricTaskInstanceQuery().taskParentTaskId(this.stepId).orderByTaskCreateTime().asc().list();		
+		for(HistoricTaskInstance currentHistoricTaskInstance:childHistoricTaskList){
+			String stepName=currentHistoricTaskInstance.getName();						
+			String childProcessStepId=currentHistoricTaskInstance.getId();				
+			String stepAssignee=currentHistoricTaskInstance.getAssignee(); 			
+			Date startTime=currentHistoricTaskInstance.getStartTime();
+			Date endTime=currentHistoricTaskInstance.getEndTime();			
+			String description=currentHistoricTaskInstance.getDescription(); 
+			String parentStepId=currentHistoricTaskInstance.getId();
+			String owner=currentHistoricTaskInstance.getOwner();
+			Date dueDate=currentHistoricTaskInstance.getDueDate();				
+			ActivitiProcessStepImpl childProcessStep=new ActivitiProcessStepImpl(stepName,getStepDefinitionKey(),childProcessStepId,getProcessObjectId(),getProcessDefinitionId(),startTime);			
+			if(parentStepId!=null){
+				childProcessStep.setParentStepId(parentStepId);
 			}			
-			if(currentTask.getAssignee()!=null){
-				childProcessStep.setStepAssignee(currentTask.getAssignee());
+			if(stepAssignee!=null){
+				childProcessStep.setStepAssignee(stepAssignee);
 			}			
-			if(currentTask.getDescription()!=null){
-				childProcessStep.setStepDescription(currentTask.getDescription());
+			if(description!=null){
+				childProcessStep.setStepDescription(description);
 			}			
-			if(currentTask.getOwner()!=null){
-				childProcessStep.setStepOwner(currentTask.getOwner());
+			if(owner!=null){
+				childProcessStep.setStepOwner(owner);
 			}			
-			if(currentTask.getDueDate()!=null){
-				childProcessStep.setDueDate(currentTask.getDueDate());
-			}						
-			childProcessStepList.add(childProcessStep);
-		}
+			if(dueDate!=null){
+				childProcessStep.setDueDate(dueDate);
+			}	
+			if(endTime!=null){
+				childProcessStep.setEndTime(endTime);
+			}				
+			childProcessStepList.add(childProcessStep);		
+		}		
 		return childProcessStepList;
 	}
 
@@ -387,4 +400,13 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			return false;
 		}		
 	}
+
+	@Override
+	public Date getEndTime() {		
+		return this.endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
+	}	
 }

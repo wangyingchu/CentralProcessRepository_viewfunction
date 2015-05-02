@@ -149,7 +149,7 @@ public class ActivitiHistoricProcessStepImpl implements HistoricProcessStep{
 			String processDefinitionId=this.processDefinitionId;
 			String stepAssignee=currentHistoricTaskInstance.getAssignee(); 			
 			Date startTime=currentHistoricTaskInstance.getStartTime();
-			Date endTime=currentHistoricTaskInstance.getClaimTime();
+			Date endTime=currentHistoricTaskInstance.getEndTime();
 			Long durationInMillis=currentHistoricTaskInstance.getDurationInMillis();
 			String description=currentHistoricTaskInstance.getDescription(); 
 			String parentStepId=currentHistoricTaskInstance.getId();

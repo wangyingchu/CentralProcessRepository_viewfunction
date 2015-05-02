@@ -13,6 +13,7 @@ public interface ProcessStep {
 	public String getProcessObjectId();
 	public String getProcessDefinitionId();	
 	public Date getCreateTime();
+	public Date getEndTime(); // this method is used to get the end date of a finished child process step
 	
 	public String getStepAssignee();
 	public void setStepAssignee(String assignee);
