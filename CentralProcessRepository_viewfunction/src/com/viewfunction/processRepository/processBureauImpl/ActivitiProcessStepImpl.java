@@ -368,13 +368,12 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 
 	@Override
 	public boolean isAllChildProcessStepsFinished() {
-		TaskService taskService = this.processEngine.getTaskService();
-		List<Task> childTasks=taskService.getSubTasks(getStepId());		
-		if(childTasks.size()==0){
+		long allChildTasksNumber=this.processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskParentTaskId(getStepId()).count();
+		if(allChildTasksNumber==0){
 			return false;
-		}
+		}		
 		long finihedChildTasksNumber=this.processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskParentTaskId(getStepId()).finished().count();
-		if(finihedChildTasksNumber==childTasks.size()){
+		if(finihedChildTasksNumber==allChildTasksNumber){
 			return true;
 		}else{
 			return false;
@@ -392,13 +391,12 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 
 	@Override
 	public boolean hasChildStep() {
-		TaskService taskService = this.processEngine.getTaskService();
-		List<Task> childTasks=taskService.getSubTasks(getStepId());
-		if(childTasks.size()>0){
-			return true;
-		}else{
+		long allChildTasksNumber=this.processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskParentTaskId(getStepId()).count();
+		if(allChildTasksNumber==0){
 			return false;
-		}		
+		}else{
+			return true;
+		}
 	}
 
 	@Override
