@@ -33,6 +33,7 @@ public interface ProcessStep {
 	public Date getDueDate();	
 	public void setDueDate(Date dueDate);
 	
+	public void updateCurrentStepDueDate(Date dueDate) throws ProcessRepositoryRuntimeException;	
 	public boolean handleCurrentStep(String userId) throws ProcessRepositoryRuntimeException;
 	public boolean completeCurrentStep(String userId) throws ProcessRepositoryRuntimeException;
 	public boolean completeCurrentStep(String userId,Map<String,Object> processVariables) throws ProcessRepositoryRuntimeException;
@@ -47,6 +48,6 @@ public interface ProcessStep {
 	public boolean deleteChildProcessStepByStepId(String childStepId);
 	public boolean deleteChildProcessSteps();
 	public List<ProcessStep> getChildProcessSteps();
-	public boolean isAllChildProcessStepsFinished();
-	
+	public boolean isAllChildProcessStepsFinished();	
+	public ProcessStep getParentProcessStep() throws ProcessRepositoryRuntimeException;	
 }

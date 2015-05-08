@@ -13,7 +13,6 @@ import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
-import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessComment;
 import com.viewfunction.processRepository.processBureau.ProcessStep;
 
@@ -243,6 +242,17 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		taskService.setAssignee(this.stepId, null);	
 		return true;
 	}
+	
+	@Override
+	public void updateCurrentStepDueDate(Date dueDate) throws ProcessRepositoryRuntimeException {
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}			
+		taskService.setDueDate(this.stepId, dueDate);
+		this.setDueDate(dueDate);
+	}	
 
 	@Override
 	public boolean reassignCurrentStep(String newUserId) throws ProcessRepositoryRuntimeException {
@@ -406,5 +416,45 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
+	}
+
+	@Override
+	public ProcessStep getParentProcessStep() throws ProcessRepositoryRuntimeException{
+		if(hasParentStep()){			
+			HistoryService historyService=this.processEngine.getHistoryService();			
+			HistoricTaskInstance parentHistoricTask= historyService.createHistoricTaskInstanceQuery().taskId(this.getParentStepId()).singleResult();			
+			String stepName=parentHistoricTask.getName();						
+			String parentProcessStepId=parentHistoricTask.getId();				
+			String stepAssignee=parentHistoricTask.getAssignee(); 			
+			Date startTime=parentHistoricTask.getStartTime();
+			Date endTime=parentHistoricTask.getEndTime();			
+			String description=parentHistoricTask.getDescription(); 
+			String parentStepId=parentHistoricTask.getParentTaskId();
+			String owner=parentHistoricTask.getOwner();
+			Date dueDate=parentHistoricTask.getDueDate();	
+			
+			ActivitiProcessStepImpl parentProcessStep=new ActivitiProcessStepImpl(stepName,getStepDefinitionKey(),parentProcessStepId,getProcessObjectId(),getProcessDefinitionId(),startTime);			
+			if(parentStepId!=null){
+				parentProcessStep.setParentStepId(parentStepId);
+			}			
+			if(stepAssignee!=null){
+				parentProcessStep.setStepAssignee(stepAssignee);
+			}			
+			if(description!=null){
+				parentProcessStep.setStepDescription(description);
+			}			
+			if(owner!=null){
+				parentProcessStep.setStepOwner(owner);
+			}			
+			if(dueDate!=null){
+				parentProcessStep.setDueDate(dueDate);
+			}	
+			if(endTime!=null){
+				parentProcessStep.setEndTime(endTime);
+			}				
+			return parentProcessStep;			
+		}else{
+			throw new ProcessRepositoryRuntimeException();
+		}		
 	}	
 }
