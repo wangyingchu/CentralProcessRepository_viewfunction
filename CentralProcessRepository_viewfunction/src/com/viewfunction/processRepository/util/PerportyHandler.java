@@ -21,7 +21,8 @@ public class PerportyHandler {
 	public static String ACTIVITI_jdbcPassword="ACTIVITI_jdbcPassword";
 	public static String ACTIVITI_jobExecutorActivate="ACTIVITI_jobExecutorActivate";
 	//public static String ACTIVITI_dbCycleUsed="ACTIVITI_dbCycleUsed";
-	
+	public static String ACTIVITI_asyncExecutorEnabled="ACTIVITI_jobExecutorActivate";
+	public static String ACTIVITI_asyncExecutorActivate="ACTIVITI_jobExecutorActivate";
 	public static String getPerportyValue(String resourceFileName) throws ProcessRepositoryRuntimeException{		
 		_properties=new Properties();
 		try {

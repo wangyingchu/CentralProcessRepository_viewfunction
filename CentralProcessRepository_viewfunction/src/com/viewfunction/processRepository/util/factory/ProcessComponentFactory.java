@@ -42,7 +42,9 @@ public class ProcessComponentFactory {
 					}else{
 						_ProcessEngineConfiguration.setJdbcPassword(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jdbcPassword).trim());
 					}					
-					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.DATA_PERSISTENCE_TYPE).trim()));
+					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jobExecutorActivate).trim()));					
+					_ProcessEngineConfiguration.setAsyncExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorActivate).trim()));
+					_ProcessEngineConfiguration.setAsyncExecutorEnabled(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorEnabled).trim()));
 				}else if(dataPersistenceType.equals(PerportyHandler.DATA_PERSISTENCE_TYPE_INMEMERY)){
 					_ProcessEngineConfiguration=ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration();					
 				}else if(dataPersistenceType.equals(PerportyHandler.DATA_PERSISTENCE_TYPE_INFILEDB)){					
@@ -53,8 +55,10 @@ public class ProcessComponentFactory {
 					_ProcessEngineConfiguration.setJdbcDriver("org.apache.derby.jdbc.EmbeddedDriver");
 					_ProcessEngineConfiguration.setJdbcUrl(jdbcURL);//"jdbc:derby:{fullpath}processRepository;create=true"
 					_ProcessEngineConfiguration.setJdbcUsername("cprdb");
-					_ProcessEngineConfiguration.setJdbcPassword("wyc");
-					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.DATA_PERSISTENCE_TYPE).trim()));					
+					_ProcessEngineConfiguration.setJdbcPassword("wyc");					
+					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jobExecutorActivate).trim()));					
+					_ProcessEngineConfiguration.setAsyncExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorActivate).trim()));
+					_ProcessEngineConfiguration.setAsyncExecutorEnabled(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorEnabled).trim()));
 				}
 				else{					
 					throw new ProcessRepositoryRuntimeException();
