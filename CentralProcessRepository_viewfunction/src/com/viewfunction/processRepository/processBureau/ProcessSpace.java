@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryDeploymentException;
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
+import com.viewfunction.processRepository.extension.ProcessSpaceEventListener;
+import com.viewfunction.processRepository.extension.ProcessSpaceEventType;
 
 public interface ProcessSpace {
 	
@@ -31,4 +33,6 @@ public interface ProcessSpace {
 	
 	public List<ProcessStep> getProcessStepsByRole(String roleName);
 	public List<ProcessStep> getProcessStepsByParticipant(String participantName);
+	
+	public void registerProcessEventListener(ProcessSpaceEventType processEventType,ProcessSpaceEventListener processEventListener);
 }

@@ -7,6 +7,7 @@ import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
+import com.viewfunction.processRepository.extensionImpl.ActivitiProcessSpaceEventListenerImpl;
 import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessObject;
 import com.viewfunction.processRepository.processBureau.ProcessSpace;
@@ -27,7 +28,6 @@ public class ProcessComponentFactory {
 		if(processEngine!=null){
 			return new ActivitiProcessSpaceImpl(processSpaceName,processEngine);
 		}		
-		
 		if(_ProcessEngineConfiguration==null){			
 			try {
 				String dataPersistenceType=PerportyHandler.getPerportyValue(PerportyHandler.DATA_PERSISTENCE_TYPE).trim();
@@ -42,9 +42,6 @@ public class ProcessComponentFactory {
 					}else{
 						_ProcessEngineConfiguration.setJdbcPassword(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jdbcPassword).trim());
 					}					
-					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jobExecutorActivate).trim()));					
-					_ProcessEngineConfiguration.setAsyncExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorActivate).trim()));
-					_ProcessEngineConfiguration.setAsyncExecutorEnabled(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorEnabled).trim()));
 				}else if(dataPersistenceType.equals(PerportyHandler.DATA_PERSISTENCE_TYPE_INMEMERY)){
 					_ProcessEngineConfiguration=ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration();					
 				}else if(dataPersistenceType.equals(PerportyHandler.DATA_PERSISTENCE_TYPE_INFILEDB)){					
@@ -55,14 +52,14 @@ public class ProcessComponentFactory {
 					_ProcessEngineConfiguration.setJdbcDriver("org.apache.derby.jdbc.EmbeddedDriver");
 					_ProcessEngineConfiguration.setJdbcUrl(jdbcURL);//"jdbc:derby:{fullpath}processRepository;create=true"
 					_ProcessEngineConfiguration.setJdbcUsername("cprdb");
-					_ProcessEngineConfiguration.setJdbcPassword("wyc");					
-					_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jobExecutorActivate).trim()));					
-					_ProcessEngineConfiguration.setAsyncExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorActivate).trim()));
-					_ProcessEngineConfiguration.setAsyncExecutorEnabled(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorEnabled).trim()));
+					_ProcessEngineConfiguration.setJdbcPassword("wyc");							
 				}
 				else{					
 					throw new ProcessRepositoryRuntimeException();
 				}				
+				_ProcessEngineConfiguration.setJobExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_jobExecutorActivate).trim()));					
+				_ProcessEngineConfiguration.setAsyncExecutorActivate(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorActivate).trim()));
+				_ProcessEngineConfiguration.setAsyncExecutorEnabled(Boolean.parseBoolean(PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_asyncExecutorEnabled).trim()));				
 			} catch (ProcessRepositoryRuntimeException e) {				
 				e.printStackTrace();
 				throw new ProcessRepositoryRuntimeException();

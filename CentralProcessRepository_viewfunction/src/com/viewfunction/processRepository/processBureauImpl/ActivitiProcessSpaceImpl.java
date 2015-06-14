@@ -20,9 +20,12 @@ import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-
+import org.activiti.engine.delegate.event.ActivitiEventType;
 import com.viewfunction.processRepository.exception.ProcessRepositoryDeploymentException;
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
+import com.viewfunction.processRepository.extension.ProcessSpaceEventListener;
+import com.viewfunction.processRepository.extension.ProcessSpaceEventType;
+import com.viewfunction.processRepository.extensionImpl.ActivitiProcessSpaceEventListenerImpl;
 import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessObject;
 import com.viewfunction.processRepository.processBureau.ProcessSpace;
@@ -314,5 +317,39 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		RuntimeService runtimeService = this.processEngine.getRuntimeService();
 		runtimeService.deleteProcessInstance(processObjectId, deleteReason);		
 		return true;
+	}
+
+	@Override
+	public void registerProcessEventListener(ProcessSpaceEventType processEventType,ProcessSpaceEventListener processEventListener) {
+		ActivitiProcessSpaceEventListenerImpl processEventListenerImpl=(ActivitiProcessSpaceEventListenerImpl)processEventListener;
+		switch(processEventType){
+			case PROCESSSTEP_ASSIGNED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.TASK_ASSIGNED);
+				break;
+			case PROCESSSTEP_CREATED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.TASK_CREATED);
+				break;
+			case PROCESSSTEP_COMPLETED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.TASK_COMPLETED);
+				break;
+			case PROCESSINSTANCE_COMPLETED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.PROCESS_COMPLETED);
+				break;
+			case PROCESSINSTANCE_CANCELLED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.PROCESS_CANCELLED);
+				break;
+			case PROCESSEXTENSIONSTEP_SUCCESS:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.JOB_EXECUTION_SUCCESS);
+				break;
+			case PROCESSEXTENSIONSTEP_FAILURE:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.JOB_EXECUTION_FAILURE);
+				break;
+			case PROCESSEXTENSIONSTEP_RETRY_DECREMENTED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.JOB_RETRIES_DECREMENTED);
+				break;
+			case PROCESSEXTENSIONSTEP_CANCELED:
+				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.JOB_CANCELED);
+				break;
+		}	
 	}	
 }
