@@ -66,7 +66,7 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 		if(isFinished){
 			return isFinished;
 		}
-		if(this.processEngine!=null){				
+		if(this.processEngine!=null){	
 			RuntimeService runtimeService = this.processEngine.getRuntimeService();		
 			ProcessInstanceQuery _ProcessInstanceQuery=runtimeService.createProcessInstanceQuery();
 			ProcessInstance _ProcessInstance=_ProcessInstanceQuery.processInstanceId(this.processObjectId).singleResult();	
@@ -178,7 +178,12 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 				HistoryService historyService = this.processEngine.getHistoryService();
 				HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery();
 				HistoricProcessInstance historicProcessInstance= historicProcessInstanceQuery.processInstanceId(this.processObjectId).singleResult();
-				return historicProcessInstance.getEndTime();				
+				if(historicProcessInstance!=null){
+					//already finished
+					return historicProcessInstance.getEndTime();
+				}else{
+					return null;
+				}
 			}
 		}		
 	}
@@ -194,7 +199,12 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 				HistoryService historyService = this.processEngine.getHistoryService();
 				HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery();
 				HistoricProcessInstance historicProcessInstance= historicProcessInstanceQuery.processInstanceId(this.processObjectId).singleResult();
-				return historicProcessInstance.getDurationInMillis();				
+				if(historicProcessInstance!=null){
+					//already finished
+					return historicProcessInstance.getDurationInMillis();
+				}else{
+					return null;
+				}
 			}			
 		}		
 	}	
