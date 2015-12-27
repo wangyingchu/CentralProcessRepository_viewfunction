@@ -7,7 +7,6 @@ import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
-import com.viewfunction.processRepository.extensionImpl.ActivitiProcessSpaceEventListenerImpl;
 import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessObject;
 import com.viewfunction.processRepository.processBureau.ProcessSpace;

@@ -35,4 +35,6 @@ public interface ProcessSpace {
 	public List<ProcessStep> getProcessStepsByParticipant(String participantName);
 	
 	public void registerProcessEventListener(ProcessSpaceEventType processEventType,ProcessSpaceEventListener processEventListener);
+	
+	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionName);
 }

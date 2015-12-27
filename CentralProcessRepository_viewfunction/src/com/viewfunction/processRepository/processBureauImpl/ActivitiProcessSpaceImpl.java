@@ -2,9 +2,13 @@ package com.viewfunction.processRepository.processBureauImpl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.FlowElement;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.IdentityService;
@@ -30,6 +34,7 @@ import com.viewfunction.processRepository.processBureau.HistoricProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessObject;
 import com.viewfunction.processRepository.processBureau.ProcessSpace;
 import com.viewfunction.processRepository.processBureau.ProcessStep;
+import com.viewfunction.processRepository.processBureau.ProcessStepDefinition;
 import com.viewfunction.processRepository.util.factory.ProcessComponentFactory;
 
 public class ActivitiProcessSpaceImpl implements ProcessSpace{
@@ -351,5 +356,29 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 				this.processEngine.getRuntimeService().addEventListener(processEventListenerImpl, ActivitiEventType.JOB_CANCELED);
 				break;
 		}	
+	}
+
+	@Override
+	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionKey) {
+		List<ProcessStepDefinition> processStepDefinationList=new ArrayList<ProcessStepDefinition>();
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).singleResult();
+		String lastProcessDefinitionId=processDefinition.getId();
+		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
+		Collection<FlowElement> flowElementCollection=processDefinitionBPMNModel.getMainProcess().getFlowElements();
+		Iterator<FlowElement> iterator=	flowElementCollection.iterator();
+		while(iterator.hasNext()){
+			FlowElement currentElement=iterator.next();
+			String currentElementClassName=currentElement.getClass().getName();
+			if(currentElementClassName.endsWith("UserTask")){
+				ActivitiProcessStepDefinitionImpl currentProcessStepDefinition=new ActivitiProcessStepDefinitionImpl();
+				currentProcessStepDefinition.setStepId(currentElement.getId());
+				currentProcessStepDefinition.setStepName(currentElement.getName());
+				currentProcessStepDefinition.setStepDescription(currentElement.getDocumentation());
+				currentProcessStepDefinition.setStepType(ProcessStepDefinition.StepType_PeopleOperationStep);
+				processStepDefinationList.add(currentProcessStepDefinition);
+			}
+		}
+		return processStepDefinationList;
 	}	
 }
