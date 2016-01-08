@@ -56,9 +56,8 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
 		String _DeploymentId=null;
 		try{
-			Deployment _Deployment=repositoryService.createDeployment()
-		      .addClasspathResource(classPathProcessDefinationFile).deploy();
-				_DeploymentId=_Deployment.getId();
+			Deployment _Deployment=repositoryService.createDeployment().addClasspathResource(classPathProcessDefinationFile).tenantId(this.getProcessSpaceName()).deploy();
+			_DeploymentId=_Deployment.getId();
 		}catch(ActivitiException e){
 			e.printStackTrace();
 			throw new ProcessRepositoryDeploymentException();			
@@ -78,7 +77,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();		
 		String _DeploymentId=null;
 		try{
-			Deployment _Deployment=repositoryService.createDeployment().addInputStream(fileName,inputStream).deploy();
+			Deployment _Deployment=repositoryService.createDeployment().addInputStream(fileName,inputStream).tenantId(this.getProcessSpaceName()).deploy();
 			_DeploymentId=_Deployment.getId();			
 		}catch(ActivitiException e){
 			e.printStackTrace();
@@ -100,7 +99,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 				identityService.setAuthenticatedUserId(startUserId);
 			}			
 			RuntimeService runtimeService = this.processEngine.getRuntimeService();
-			ProcessInstance _ProcessInstance= runtimeService.startProcessInstanceByKey(processType);				
+			ProcessInstance _ProcessInstance=runtimeService.startProcessInstanceByKeyAndTenantId(processType, this.getProcessSpaceName());
 			ProcessObject _ProcessObject=ProcessComponentFactory.createProcessObject(_ProcessInstance.getProcessInstanceId(),_ProcessInstance.getProcessDefinitionId(),_ProcessInstance.isEnded());	
 			((ActivitiProcessObjectImpl)_ProcessObject).setProcessEngine(this.processEngine);
 			if(startUserId!=null){
@@ -122,7 +121,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 				identityService.setAuthenticatedUserId(startUserId);
 			}
 			RuntimeService runtimeService = this.processEngine.getRuntimeService();
-			ProcessInstance _ProcessInstance= runtimeService.startProcessInstanceByKey(processType,processVariables);	
+			ProcessInstance _ProcessInstance= runtimeService.startProcessInstanceByKeyAndTenantId(processType,processVariables, this.getProcessSpaceName());
 			ProcessObject _ProcessObject=ProcessComponentFactory.createProcessObject(
 					 _ProcessInstance.getProcessInstanceId(),_ProcessInstance.getProcessDefinitionId(),_ProcessInstance.isEnded());	
 			((ActivitiProcessObjectImpl)_ProcessObject).setProcessEngine(this.processEngine);
@@ -141,7 +140,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		ProcessObject _ProcessObject=null;
 		HistoryService historyService = processEngine.getHistoryService();
 		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
-		HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).singleResult();
+		HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).processInstanceTenantId(this.getProcessSpaceName()).singleResult();
 		if(historicProcessInstance==null){
 			return null;
 		}		
@@ -157,7 +156,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	
 	@Override
 	public List<ProcessObject> getProcessObjectsByProcessType(String processType,int processStatus) throws ProcessRepositoryRuntimeException {		
-		List<ProcessDefinition> _ProcessDefinitionList =this.processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionKey(processType).list();
+		List<ProcessDefinition> _ProcessDefinitionList =this.processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionKey(processType).processDefinitionTenantId(this.getProcessSpaceName()).list();
 		if(_ProcessDefinitionList.size()==0){
 			throw new ProcessRepositoryRuntimeException();
 		}			
@@ -165,11 +164,11 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
 		List<HistoricProcessInstance> historicProcessInstanceList;
 		if(processStatus==ProcessSpace.PROCESS_STATUS_FINISHED){
-			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).finished().orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).processInstanceTenantId(this.getProcessSpaceName()).finished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_UNFINISHED){
-			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).unfinished().orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).processInstanceTenantId(this.getProcessSpaceName()).unfinished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_ALL){
-			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.processDefinitionKey(processType).processInstanceTenantId(this.getProcessSpaceName()).orderByProcessInstanceId().asc().list();
 		}else{
 			throw new ProcessRepositoryRuntimeException();
 		}		
@@ -190,14 +189,14 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	@Override
 	public List<ProcessStep> getProcessStepsByRole(String roleName) {
 		TaskService taskService=this.processEngine.getTaskService();
-		List<Task> taskList=taskService.createTaskQuery().taskCandidateGroup(roleName).orderByTaskCreateTime().asc().list();		
+		List<Task> taskList=taskService.createTaskQuery().taskCandidateGroup(roleName).taskTenantId(this.getProcessSpaceName()).orderByTaskCreateTime().asc().list();		
 		return createProcessStepList(taskList);
 	}
 
 	@Override
 	public List<ProcessStep> getProcessStepsByParticipant(String participantName) {
 		TaskService taskService=this.processEngine.getTaskService();
-		List<Task> taskList=taskService.createTaskQuery().taskAssignee(participantName).orderByTaskCreateTime().asc().list();		
+		List<Task> taskList=taskService.createTaskQuery().taskAssignee(participantName).taskTenantId(this.getProcessSpaceName()).orderByTaskCreateTime().asc().list();		
 		return createProcessStepList(taskList);
 	}
 	
@@ -210,7 +209,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 			if(currentTask.getParentTaskId()!=null){
 				//should use parent task's process info to build process data				
 				HistoryService historyService=this.processEngine.getHistoryService();				
-				HistoricTaskInstance parentTask=historyService.createHistoricTaskInstanceQuery().taskId(currentTask.getParentTaskId()).singleResult();				
+				HistoricTaskInstance parentTask=historyService.createHistoricTaskInstanceQuery().taskId(currentTask.getParentTaskId()).taskTenantId(this.getProcessSpaceName()).singleResult();				
 				stepDefinitionKey=parentTask.getTaskDefinitionKey();
 				processObjectId=parentTask.getProcessInstanceId();
 				processDefinitionId=parentTask.getProcessDefinitionId();				
@@ -244,7 +243,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	@Override
 	public String getProcessNameByDefinitionId(String processDefinId) {
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
-		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionId(processDefinId).singleResult();		
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionId(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).singleResult();		
 		return processDefinition.getKey();
 	}
 
@@ -254,11 +253,11 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
 		List<HistoricProcessInstance> historicProcessInstanceList;
 		if(processStatus==ProcessSpace.PROCESS_STATUS_FINISHED){
-			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).finished().orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).processInstanceTenantId(this.getProcessSpaceName()).finished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_UNFINISHED){
-			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).unfinished().orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).processInstanceTenantId(this.getProcessSpaceName()).unfinished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_ALL){
-			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).orderByProcessInstanceId().asc().list();
+			historicProcessInstanceList=historicProcessInstanceQuery.startedBy(startUserId).processInstanceTenantId(this.getProcessSpaceName()).orderByProcessInstanceId().asc().list();
 		}else{
 			throw new ProcessRepositoryRuntimeException();
 		}		
@@ -282,11 +281,11 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		HistoricTaskInstanceQuery historicTaskInstanceQuery= historyService.createHistoricTaskInstanceQuery(); 		
 		List<HistoricTaskInstance> historicTaskInstanceList=null;		
 		if(processStatus==ProcessSpace.PROCESS_STATUS_FINISHED){
-			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).finished().orderByProcessInstanceId().asc().list();
+			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).taskTenantId(this.getProcessSpaceName()).finished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_UNFINISHED){
-			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).unfinished().orderByProcessInstanceId().asc().list();
+			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).taskTenantId(this.getProcessSpaceName()).unfinished().orderByProcessInstanceId().asc().list();
 		}else if(processStatus==ProcessSpace.PROCESS_STATUS_ALL){
-			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).orderByProcessInstanceId().asc().list();
+			historicTaskInstanceList =historicTaskInstanceQuery.taskAssignee(involvedUserId).taskTenantId(this.getProcessSpaceName()).orderByProcessInstanceId().asc().list();
 		}else{
 			throw new ProcessRepositoryRuntimeException();
 		}		
@@ -320,7 +319,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	@Override
 	public boolean deleteProcessByProcessObjectId(String processObjectId,String deleteReason) {
 		RuntimeService runtimeService = this.processEngine.getRuntimeService();
-		runtimeService.deleteProcessInstance(processObjectId, deleteReason);		
+		runtimeService.deleteProcessInstance(processObjectId, deleteReason);
 		return true;
 	}
 
@@ -362,7 +361,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionKey) {
 		List<ProcessStepDefinition> processStepDefinationList=new ArrayList<ProcessStepDefinition>();
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
-		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).singleResult();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
 		String lastProcessDefinitionId=processDefinition.getId();
 		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
 		Collection<FlowElement> flowElementCollection=processDefinitionBPMNModel.getMainProcess().getFlowElements();
