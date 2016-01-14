@@ -23,6 +23,7 @@ public class PerportyHandler {
 	//public static String ACTIVITI_dbCycleUsed="ACTIVITI_dbCycleUsed";
 	public static String ACTIVITI_asyncExecutorEnabled="ACTIVITI_jobExecutorActivate";
 	public static String ACTIVITI_asyncExecutorActivate="ACTIVITI_jobExecutorActivate";
+	public static String ACTIVITI_definitionFlowDiagramFont="ACTIVITI_definitionFlowDiagramFont";
 	public static String getPerportyValue(String resourceFileName) throws ProcessRepositoryRuntimeException{		
 		_properties=new Properties();
 		try {

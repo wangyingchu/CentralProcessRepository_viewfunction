@@ -24,6 +24,8 @@ import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.activiti.image.ProcessDiagramGenerator;
+import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import com.viewfunction.processRepository.exception.ProcessRepositoryDeploymentException;
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
@@ -35,6 +37,7 @@ import com.viewfunction.processRepository.processBureau.ProcessObject;
 import com.viewfunction.processRepository.processBureau.ProcessSpace;
 import com.viewfunction.processRepository.processBureau.ProcessStep;
 import com.viewfunction.processRepository.processBureau.ProcessStepDefinition;
+import com.viewfunction.processRepository.util.PerportyHandler;
 import com.viewfunction.processRepository.util.factory.ProcessComponentFactory;
 
 public class ActivitiProcessSpaceImpl implements ProcessSpace{
@@ -379,5 +382,23 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 			}
 		}
 		return processStepDefinationList;
+	}
+
+	@Override
+	public InputStream getProcessDefinitionFlowDiagram(String processDefinitionKey) {
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
+		String lastProcessDefinitionId=processDefinition.getId();
+		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
+		ProcessDiagramGenerator procDiaGenerator = new DefaultProcessDiagramGenerator(); 
+		String diagramFont="ËÎÌו";
+		try {
+			diagramFont=PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_definitionFlowDiagramFont).trim();
+		} catch (ProcessRepositoryRuntimeException e) {
+			e.printStackTrace();
+		}
+		InputStream is = procDiaGenerator.generateDiagram(  
+				processDefinitionBPMNModel, "png",new ArrayList<String>(),new ArrayList<String>(), diagramFont,diagramFont,null,1);  
+		return is;
 	}	
 }
