@@ -18,6 +18,7 @@ public interface ProcessSpace {
 	public String getProcessSpaceName();
 	public boolean addProcessDefinition(String classPathProcessDefinationFile) throws ProcessRepositoryDeploymentException;
 	public boolean addProcessDefinition(String fileName, InputStream inputStream) throws ProcessRepositoryDeploymentException;
+	public boolean updateProcessDefinition(String processDefinId,InputStream inputStream)throws ProcessRepositoryDeploymentException;
 	
 	public String getProcessNameByDefinitionId(String processDefinId);	
 	
@@ -38,5 +39,6 @@ public interface ProcessSpace {
 	
 	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionName);
 	
-	public InputStream getProcessDefinitionFlowDiagram(String processDefinitionName);
+	public InputStream getProcessDefinitionFlowDiagram(String processDefinId);
+	public InputStream getProcessDefinitionFile(String processDefinId);
 }

@@ -400,5 +400,36 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		InputStream is = procDiaGenerator.generateDiagram(  
 				processDefinitionBPMNModel, "png",new ArrayList<String>(),new ArrayList<String>(), diagramFont,diagramFont,null,1);  
 		return is;
+	}
+
+	@Override
+	public boolean updateProcessDefinition(String processDefinId,InputStream inputStream)throws ProcessRepositoryDeploymentException {
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();		
+		String _DeploymentId=null;
+		try{
+			ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
+			if(processDefinition==null){
+				return false;
+			}else{
+				String definitionFileName=processDefinId+".bpmn20.xml";
+				Deployment _Deployment=repositoryService.createDeployment().addInputStream(definitionFileName,inputStream).tenantId(this.getProcessSpaceName()).deploy();
+				_DeploymentId=_Deployment.getId();
+			}
+		}catch(ActivitiException e){
+			e.printStackTrace();
+			throw new ProcessRepositoryDeploymentException();			
+		}		
+		if(_DeploymentId!=null){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	@Override
+	public InputStream getProcessDefinitionFile(String processDefinId) {
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
+		return repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
 	}	
 }
