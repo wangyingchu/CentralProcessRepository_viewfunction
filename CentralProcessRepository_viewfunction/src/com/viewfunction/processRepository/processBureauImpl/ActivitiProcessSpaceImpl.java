@@ -391,7 +391,7 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		String lastProcessDefinitionId=processDefinition.getId();
 		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
 		ProcessDiagramGenerator procDiaGenerator = new DefaultProcessDiagramGenerator(); 
-		String diagramFont="ËÎÌå";
+		String diagramFont="å®‹ä½“";
 		try {
 			diagramFont=PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_definitionFlowDiagramFont).trim();
 		} catch (ProcessRepositoryRuntimeException e) {
