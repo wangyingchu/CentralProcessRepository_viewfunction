@@ -1,0 +1,616 @@
+use cprdb;
+
+CREATE
+    TABLE
+        ACT_GE_PROPERTY(
+            NAME_ VARCHAR(64),
+            VALUE_ VARCHAR(300),
+            REV_ INTEGER,
+            PRIMARY key(NAME_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+INSERT
+    INTO
+        ACT_GE_PROPERTY
+    VALUES(
+        'schema.version',
+        '5.17.0.2',
+        1
+    );
+
+INSERT
+    INTO
+        ACT_GE_PROPERTY
+    VALUES(
+        'schema.history',
+        'create(5.17.0.2)',
+        1
+    );
+
+INSERT
+    INTO
+        ACT_GE_PROPERTY
+    VALUES(
+        'next.dbid',
+        '1',
+        1
+    );
+
+CREATE
+    TABLE
+        ACT_GE_BYTEARRAY(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            NAME_ VARCHAR(255),
+            DEPLOYMENT_ID_ VARCHAR(64),
+            BYTES_ LONGBLOB,
+            GENERATED_ TINYINT,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RE_DEPLOYMENT(
+            ID_ VARCHAR(64),
+            NAME_ VARCHAR(255),
+            CATEGORY_ VARCHAR(255),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            DEPLOY_TIME_ TIMESTAMP,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RE_MODEL(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            NAME_ VARCHAR(255),
+            KEY_ VARCHAR(255),
+            CATEGORY_ VARCHAR(255),
+            CREATE_TIME_ TIMESTAMP NULL,
+            LAST_UPDATE_TIME_ TIMESTAMP NULL,
+            VERSION_ INTEGER,
+            META_INFO_ VARCHAR(4000),
+            DEPLOYMENT_ID_ VARCHAR(64),
+            EDITOR_SOURCE_VALUE_ID_ VARCHAR(64),
+            EDITOR_SOURCE_EXTRA_VALUE_ID_ VARCHAR(64),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_EXECUTION(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            PROC_INST_ID_ VARCHAR(64),
+            BUSINESS_KEY_ VARCHAR(255),
+            PARENT_ID_ VARCHAR(64),
+            PROC_DEF_ID_ VARCHAR(64),
+            SUPER_EXEC_ VARCHAR(64),
+            ACT_ID_ VARCHAR(255),
+            IS_ACTIVE_ TINYINT,
+            IS_CONCURRENT_ TINYINT,
+            IS_SCOPE_ TINYINT,
+            IS_EVENT_SCOPE_ TINYINT,
+            SUSPENSION_STATE_ INTEGER,
+            CACHED_ENT_STATE_ INTEGER,
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            NAME_ VARCHAR(255),
+            LOCK_TIME_ TIMESTAMP NULL,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_JOB(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            TYPE_ VARCHAR(255) NOT NULL,
+            LOCK_EXP_TIME_ TIMESTAMP NULL,
+            LOCK_OWNER_ VARCHAR(255),
+            EXCLUSIVE_ BOOLEAN,
+            EXECUTION_ID_ VARCHAR(64),
+            PROCESS_INSTANCE_ID_ VARCHAR(64),
+            PROC_DEF_ID_ VARCHAR(64),
+            RETRIES_ INTEGER,
+            EXCEPTION_STACK_ID_ VARCHAR(64),
+            EXCEPTION_MSG_ VARCHAR(4000),
+            DUEDATE_ TIMESTAMP NULL,
+            REPEAT_ VARCHAR(255),
+            HANDLER_TYPE_ VARCHAR(255),
+            HANDLER_CFG_ VARCHAR(4000),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RE_PROCDEF(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            CATEGORY_ VARCHAR(255),
+            NAME_ VARCHAR(255),
+            KEY_ VARCHAR(255) NOT NULL,
+            VERSION_ INTEGER NOT NULL,
+            DEPLOYMENT_ID_ VARCHAR(64),
+            RESOURCE_NAME_ VARCHAR(4000),
+            DGRM_RESOURCE_NAME_ VARCHAR(4000),
+            DESCRIPTION_ VARCHAR(4000),
+            HAS_START_FORM_KEY_ TINYINT,
+            HAS_GRAPHICAL_NOTATION_ TINYINT,
+            SUSPENSION_STATE_ INTEGER,
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_TASK(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            EXECUTION_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            PROC_DEF_ID_ VARCHAR(64),
+            NAME_ VARCHAR(255),
+            PARENT_TASK_ID_ VARCHAR(64),
+            DESCRIPTION_ VARCHAR(4000),
+            TASK_DEF_KEY_ VARCHAR(255),
+            OWNER_ VARCHAR(255),
+            ASSIGNEE_ VARCHAR(255),
+            DELEGATION_ VARCHAR(64),
+            PRIORITY_ INTEGER,
+            CREATE_TIME_ TIMESTAMP,
+            DUE_DATE_ datetime,
+            CATEGORY_ VARCHAR(255),
+            SUSPENSION_STATE_ INTEGER,
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            FORM_KEY_ VARCHAR(255),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_IDENTITYLINK(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            GROUP_ID_ VARCHAR(255),
+            TYPE_ VARCHAR(255),
+            USER_ID_ VARCHAR(255),
+            TASK_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            PROC_DEF_ID_ VARCHAR(64),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_VARIABLE(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            TYPE_ VARCHAR(255) NOT NULL,
+            NAME_ VARCHAR(255) NOT NULL,
+            EXECUTION_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            TASK_ID_ VARCHAR(64),
+            BYTEARRAY_ID_ VARCHAR(64),
+            DOUBLE_ DOUBLE,
+            LONG_ BIGINT,
+            TEXT_ VARCHAR(4000),
+            TEXT2_ VARCHAR(4000),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_RU_EVENT_SUBSCR(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            EVENT_TYPE_ VARCHAR(255) NOT NULL,
+            EVENT_NAME_ VARCHAR(255),
+            EXECUTION_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            ACTIVITY_ID_ VARCHAR(64),
+            CONFIGURATION_ VARCHAR(255),
+            CREATED_ TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PROC_DEF_ID_ VARCHAR(64),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_EVT_LOG(
+            LOG_NR_ BIGINT auto_increment,
+            TYPE_ VARCHAR(64),
+            PROC_DEF_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            EXECUTION_ID_ VARCHAR(64),
+            TASK_ID_ VARCHAR(64),
+            TIME_STAMP_ TIMESTAMP NOT NULL,
+            USER_ID_ VARCHAR(255),
+            DATA_ LONGBLOB,
+            LOCK_OWNER_ VARCHAR(255),
+            LOCK_TIME_ TIMESTAMP NULL,
+            IS_PROCESSED_ tinyint DEFAULT 0,
+            PRIMARY key(LOG_NR_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    index ACT_IDX_EXEC_BUSKEY
+        ON ACT_RU_EXECUTION(BUSINESS_KEY_);
+
+CREATE
+    index ACT_IDX_TASK_CREATE
+        ON ACT_RU_TASK(CREATE_TIME_);
+
+CREATE
+    index ACT_IDX_IDENT_LNK_USER
+        ON ACT_RU_IDENTITYLINK(USER_ID_);
+
+CREATE
+    index ACT_IDX_IDENT_LNK_GROUP
+        ON ACT_RU_IDENTITYLINK(GROUP_ID_);
+
+CREATE
+    index ACT_IDX_EVENT_SUBSCR_CONFIG_
+        ON ACT_RU_EVENT_SUBSCR(CONFIGURATION_);
+
+CREATE
+    index ACT_IDX_VARIABLE_TASK_ID
+        ON ACT_RU_VARIABLE(TASK_ID_);
+
+CREATE
+    index ACT_IDX_ATHRZ_PROCEDEF
+        ON ACT_RU_IDENTITYLINK(PROC_DEF_ID_);
+
+ALTER TABLE
+    ACT_GE_BYTEARRAY add CONSTRAINT ACT_FK_BYTEARR_DEPL FOREIGN key(DEPLOYMENT_ID_) REFERENCES ACT_RE_DEPLOYMENT(ID_);
+
+ALTER TABLE
+    ACT_RE_PROCDEF add CONSTRAINT ACT_UNIQ_PROCDEF UNIQUE(
+        KEY_,
+        VERSION_,
+        TENANT_ID_
+    );
+
+ALTER TABLE
+    ACT_RU_EXECUTION add CONSTRAINT ACT_FK_EXE_PROCINST FOREIGN key(PROC_INST_ID_) REFERENCES ACT_RU_EXECUTION(ID_)
+        ON DELETE
+        CASCADE
+            ON UPDATE
+            CASCADE;
+
+ALTER TABLE
+    ACT_RU_EXECUTION add CONSTRAINT ACT_FK_EXE_PARENT FOREIGN key(PARENT_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_EXECUTION add CONSTRAINT ACT_FK_EXE_SUPER FOREIGN key(SUPER_EXEC_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_EXECUTION add CONSTRAINT ACT_FK_EXE_PROCDEF FOREIGN key(PROC_DEF_ID_) REFERENCES ACT_RE_PROCDEF(ID_);
+
+ALTER TABLE
+    ACT_RU_IDENTITYLINK add CONSTRAINT ACT_FK_TSKASS_TASK FOREIGN key(TASK_ID_) REFERENCES ACT_RU_TASK(ID_);
+
+ALTER TABLE
+    ACT_RU_IDENTITYLINK add CONSTRAINT ACT_FK_ATHRZ_PROCEDEF FOREIGN key(PROC_DEF_ID_) REFERENCES ACT_RE_PROCDEF(ID_);
+
+ALTER TABLE
+    ACT_RU_IDENTITYLINK add CONSTRAINT ACT_FK_IDL_PROCINST FOREIGN key(PROC_INST_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_TASK add CONSTRAINT ACT_FK_TASK_EXE FOREIGN key(EXECUTION_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_TASK add CONSTRAINT ACT_FK_TASK_PROCINST FOREIGN key(PROC_INST_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_TASK add CONSTRAINT ACT_FK_TASK_PROCDEF FOREIGN key(PROC_DEF_ID_) REFERENCES ACT_RE_PROCDEF(ID_);
+
+ALTER TABLE
+    ACT_RU_VARIABLE add CONSTRAINT ACT_FK_VAR_EXE FOREIGN key(EXECUTION_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_VARIABLE add CONSTRAINT ACT_FK_VAR_PROCINST FOREIGN key(PROC_INST_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RU_VARIABLE add CONSTRAINT ACT_FK_VAR_BYTEARRAY FOREIGN key(BYTEARRAY_ID_) REFERENCES ACT_GE_BYTEARRAY(ID_);
+
+ALTER TABLE
+    ACT_RU_JOB add CONSTRAINT ACT_FK_JOB_EXCEPTION FOREIGN key(EXCEPTION_STACK_ID_) REFERENCES ACT_GE_BYTEARRAY(ID_);
+
+ALTER TABLE
+    ACT_RU_EVENT_SUBSCR add CONSTRAINT ACT_FK_EVENT_EXEC FOREIGN key(EXECUTION_ID_) REFERENCES ACT_RU_EXECUTION(ID_);
+
+ALTER TABLE
+    ACT_RE_MODEL add CONSTRAINT ACT_FK_MODEL_SOURCE FOREIGN key(EDITOR_SOURCE_VALUE_ID_) REFERENCES ACT_GE_BYTEARRAY(ID_);
+
+ALTER TABLE
+    ACT_RE_MODEL add CONSTRAINT ACT_FK_MODEL_SOURCE_EXTRA FOREIGN key(EDITOR_SOURCE_EXTRA_VALUE_ID_) REFERENCES ACT_GE_BYTEARRAY(ID_);
+
+ALTER TABLE
+    ACT_RE_MODEL add CONSTRAINT ACT_FK_MODEL_DEPLOYMENT FOREIGN key(DEPLOYMENT_ID_) REFERENCES ACT_RE_DEPLOYMENT(ID_);
+
+CREATE
+    TABLE
+        ACT_HI_PROCINST(
+            ID_ VARCHAR(64) NOT NULL,
+            PROC_INST_ID_ VARCHAR(64) NOT NULL,
+            BUSINESS_KEY_ VARCHAR(255),
+            PROC_DEF_ID_ VARCHAR(64) NOT NULL,
+            START_TIME_ datetime NOT NULL,
+            END_TIME_ datetime,
+            DURATION_ BIGINT,
+            START_USER_ID_ VARCHAR(255),
+            START_ACT_ID_ VARCHAR(255),
+            END_ACT_ID_ VARCHAR(255),
+            SUPER_PROCESS_INSTANCE_ID_ VARCHAR(64),
+            DELETE_REASON_ VARCHAR(4000),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            NAME_ VARCHAR(255),
+            PRIMARY key(ID_),
+            UNIQUE(PROC_INST_ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_ACTINST(
+            ID_ VARCHAR(64) NOT NULL,
+            PROC_DEF_ID_ VARCHAR(64) NOT NULL,
+            PROC_INST_ID_ VARCHAR(64) NOT NULL,
+            EXECUTION_ID_ VARCHAR(64) NOT NULL,
+            ACT_ID_ VARCHAR(255) NOT NULL,
+            TASK_ID_ VARCHAR(64),
+            CALL_PROC_INST_ID_ VARCHAR(64),
+            ACT_NAME_ VARCHAR(255),
+            ACT_TYPE_ VARCHAR(255) NOT NULL,
+            ASSIGNEE_ VARCHAR(255),
+            START_TIME_ datetime NOT NULL,
+            END_TIME_ datetime,
+            DURATION_ BIGINT,
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_TASKINST(
+            ID_ VARCHAR(64) NOT NULL,
+            PROC_DEF_ID_ VARCHAR(64),
+            TASK_DEF_KEY_ VARCHAR(255),
+            PROC_INST_ID_ VARCHAR(64),
+            EXECUTION_ID_ VARCHAR(64),
+            NAME_ VARCHAR(255),
+            PARENT_TASK_ID_ VARCHAR(64),
+            DESCRIPTION_ VARCHAR(4000),
+            OWNER_ VARCHAR(255),
+            ASSIGNEE_ VARCHAR(255),
+            START_TIME_ datetime NOT NULL,
+            CLAIM_TIME_ datetime,
+            END_TIME_ datetime,
+            DURATION_ BIGINT,
+            DELETE_REASON_ VARCHAR(4000),
+            PRIORITY_ INTEGER,
+            DUE_DATE_ datetime,
+            FORM_KEY_ VARCHAR(255),
+            CATEGORY_ VARCHAR(255),
+            TENANT_ID_ VARCHAR(255) DEFAULT '',
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_VARINST(
+            ID_ VARCHAR(64) NOT NULL,
+            PROC_INST_ID_ VARCHAR(64),
+            EXECUTION_ID_ VARCHAR(64),
+            TASK_ID_ VARCHAR(64),
+            NAME_ VARCHAR(255) NOT NULL,
+            VAR_TYPE_ VARCHAR(100),
+            REV_ INTEGER,
+            BYTEARRAY_ID_ VARCHAR(64),
+            DOUBLE_ DOUBLE,
+            LONG_ BIGINT,
+            TEXT_ VARCHAR(4000),
+            TEXT2_ VARCHAR(4000),
+            CREATE_TIME_ datetime,
+            LAST_UPDATED_TIME_ datetime,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_DETAIL(
+            ID_ VARCHAR(64) NOT NULL,
+            TYPE_ VARCHAR(255) NOT NULL,
+            PROC_INST_ID_ VARCHAR(64),
+            EXECUTION_ID_ VARCHAR(64),
+            TASK_ID_ VARCHAR(64),
+            ACT_INST_ID_ VARCHAR(64),
+            NAME_ VARCHAR(255) NOT NULL,
+            VAR_TYPE_ VARCHAR(255),
+            REV_ INTEGER,
+            TIME_ datetime NOT NULL,
+            BYTEARRAY_ID_ VARCHAR(64),
+            DOUBLE_ DOUBLE,
+            LONG_ BIGINT,
+            TEXT_ VARCHAR(4000),
+            TEXT2_ VARCHAR(4000),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_COMMENT(
+            ID_ VARCHAR(64) NOT NULL,
+            TYPE_ VARCHAR(255),
+            TIME_ datetime NOT NULL,
+            USER_ID_ VARCHAR(255),
+            TASK_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            ACTION_ VARCHAR(255),
+            MESSAGE_ VARCHAR(4000),
+            FULL_MSG_ LONGBLOB,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_ATTACHMENT(
+            ID_ VARCHAR(64) NOT NULL,
+            REV_ INTEGER,
+            USER_ID_ VARCHAR(255),
+            NAME_ VARCHAR(255),
+            DESCRIPTION_ VARCHAR(4000),
+            TYPE_ VARCHAR(255),
+            TASK_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            URL_ VARCHAR(4000),
+            CONTENT_ID_ VARCHAR(64),
+            TIME_ datetime,
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_HI_IDENTITYLINK(
+            ID_ VARCHAR(64),
+            GROUP_ID_ VARCHAR(255),
+            TYPE_ VARCHAR(255),
+            USER_ID_ VARCHAR(255),
+            TASK_ID_ VARCHAR(64),
+            PROC_INST_ID_ VARCHAR(64),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    index ACT_IDX_HI_PRO_INST_END
+        ON ACT_HI_PROCINST(END_TIME_);
+
+CREATE
+    index ACT_IDX_HI_PRO_I_BUSKEY
+        ON ACT_HI_PROCINST(BUSINESS_KEY_);
+
+CREATE
+    index ACT_IDX_HI_ACT_INST_START
+        ON ACT_HI_ACTINST(START_TIME_);
+
+CREATE
+    index ACT_IDX_HI_ACT_INST_END
+        ON ACT_HI_ACTINST(END_TIME_);
+
+CREATE
+    index ACT_IDX_HI_DETAIL_PROC_INST
+        ON ACT_HI_DETAIL(PROC_INST_ID_);
+
+CREATE
+    index ACT_IDX_HI_DETAIL_ACT_INST
+        ON ACT_HI_DETAIL(ACT_INST_ID_);
+
+CREATE
+    index ACT_IDX_HI_DETAIL_TIME
+        ON ACT_HI_DETAIL(TIME_);
+
+CREATE
+    index ACT_IDX_HI_DETAIL_NAME
+        ON ACT_HI_DETAIL(NAME_);
+
+CREATE
+    index ACT_IDX_HI_DETAIL_TASK_ID
+        ON ACT_HI_DETAIL(TASK_ID_);
+
+CREATE
+    index ACT_IDX_HI_PROCVAR_PROC_INST
+        ON ACT_HI_VARINST(PROC_INST_ID_);
+
+CREATE
+    index ACT_IDX_HI_PROCVAR_NAME_TYPE
+        ON ACT_HI_VARINST(
+        NAME_,
+        VAR_TYPE_
+    );
+
+CREATE
+    index ACT_IDX_HI_PROCVAR_TASK_ID
+        ON ACT_HI_VARINST(TASK_ID_);
+
+CREATE
+    index ACT_IDX_HI_ACT_INST_PROCINST
+        ON ACT_HI_ACTINST(
+        PROC_INST_ID_,
+        ACT_ID_
+    );
+
+CREATE
+    index ACT_IDX_HI_ACT_INST_EXEC
+        ON ACT_HI_ACTINST(
+        EXECUTION_ID_,
+        ACT_ID_
+    );
+
+CREATE
+    index ACT_IDX_HI_IDENT_LNK_USER
+        ON ACT_HI_IDENTITYLINK(USER_ID_);
+
+CREATE
+    index ACT_IDX_HI_IDENT_LNK_TASK
+        ON ACT_HI_IDENTITYLINK(TASK_ID_);
+
+CREATE
+    index ACT_IDX_HI_IDENT_LNK_PROCINST
+        ON ACT_HI_IDENTITYLINK(PROC_INST_ID_);
+
+CREATE
+    TABLE
+        ACT_ID_GROUP(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            NAME_ VARCHAR(255),
+            TYPE_ VARCHAR(255),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_ID_MEMBERSHIP(
+            USER_ID_ VARCHAR(64),
+            GROUP_ID_ VARCHAR(64),
+            PRIMARY key(
+                USER_ID_,
+                GROUP_ID_
+            )
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_ID_USER(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            FIRST_ VARCHAR(255),
+            LAST_ VARCHAR(255),
+            EMAIL_ VARCHAR(255),
+            PWD_ VARCHAR(255),
+            PICTURE_ID_ VARCHAR(64),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+CREATE
+    TABLE
+        ACT_ID_INFO(
+            ID_ VARCHAR(64),
+            REV_ INTEGER,
+            USER_ID_ VARCHAR(64),
+            TYPE_ VARCHAR(64),
+            KEY_ VARCHAR(255),
+            VALUE_ VARCHAR(255),
+            PASSWORD_ LONGBLOB,
+            PARENT_ID_ VARCHAR(255),
+            PRIMARY key(ID_)
+        ) ENGINE = InnoDB DEFAULT CHARSET = utf8 COLLATE utf8_bin;
+
+ALTER TABLE
+    ACT_ID_MEMBERSHIP add CONSTRAINT ACT_FK_MEMB_GROUP FOREIGN key(GROUP_ID_) REFERENCES ACT_ID_GROUP(ID_);
+
+ALTER TABLE
+    ACT_ID_MEMBERSHIP add CONSTRAINT ACT_FK_MEMB_USER FOREIGN key(USER_ID_) REFERENCES ACT_ID_USER(ID_);
