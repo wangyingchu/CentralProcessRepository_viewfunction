@@ -277,7 +277,8 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		}
 		childTask.setParentTaskId(getStepId()); 
 		childTask.setName(childStepName);
-		childTask.setDescription(childStepDescription);		
+		childTask.setDescription(childStepDescription);
+		childTask.setTenantId(this.processEngine.getName());
 		if(childSteDdueDate!=null){
 			childTask.setDueDate(childSteDdueDate);
 		}else{
