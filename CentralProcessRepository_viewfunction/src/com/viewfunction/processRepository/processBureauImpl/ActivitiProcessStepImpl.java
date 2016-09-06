@@ -10,6 +10,7 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.task.Comment;
+import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 
 import com.viewfunction.processRepository.exception.ProcessRepositoryRuntimeException;
@@ -137,10 +138,22 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 				throw new ProcessRepositoryRuntimeException();
 			}
 		}
+		
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					//resolve task will clear owner and set assignee back to owner
+					taskService.resolveTask(currentTask.getId());
+					break;
+				case RESOLVED:
+					break;
+			}
+		}
+		
 		taskService.complete(currentTask.getId());		
 		return true;
 	}
-
 
 	@Override
 	public boolean completeCurrentStep(String userId,Map<String, Object> processVariables)throws ProcessRepositoryRuntimeException {
@@ -153,6 +166,19 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 				throw new ProcessRepositoryRuntimeException();
 			}
 		}
+		
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					//resolve task will clear owner and set assignee back to owner
+					taskService.resolveTask(currentTask.getId());
+					break;
+				case RESOLVED:
+					break;
+			}
+		}
+		
 		taskService.complete(currentTask.getId(),processVariables);		
 		return true;
 	}
@@ -262,8 +288,21 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			throw new ProcessRepositoryRuntimeException();			
 		}		
 		String newTaskOwner=currentTask.getAssignee();
-		taskService.delegateTask(this.stepId, newUserId);
+		taskService.setAssignee(this.stepId, newUserId);
 		taskService.setOwner(this.stepId, newTaskOwner);		
+		return true;
+	}
+	
+	@Override
+	public boolean delegateCurrentStep(String newUserId) throws ProcessRepositoryRuntimeException {
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}		
+		String newTaskOwner=currentTask.getAssignee();
+		taskService.delegateTask(this.stepId, newUserId);
+		taskService.setOwner(this.stepId, newTaskOwner);
 		return true;
 	}
 

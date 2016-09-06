@@ -40,6 +40,7 @@ public interface ProcessStep {
 	public boolean saveCurrentStep(String userId) throws ProcessRepositoryRuntimeException;
 	public boolean returnCurrentStep() throws ProcessRepositoryRuntimeException;
 	public boolean reassignCurrentStep(String newUserId) throws ProcessRepositoryRuntimeException;
+	public boolean delegateCurrentStep(String delegateToUserId) throws ProcessRepositoryRuntimeException;
 	
 	public void addComment(ProcessComment processComment);
 	public List<ProcessComment> getComments();
