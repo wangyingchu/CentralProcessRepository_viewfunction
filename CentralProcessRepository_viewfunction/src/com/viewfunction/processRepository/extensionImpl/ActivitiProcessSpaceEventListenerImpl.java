@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
+import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
@@ -15,6 +17,7 @@ import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.JobQuery;
+import org.activiti.engine.task.Task;
 
 import com.viewfunction.processRepository.extension.ExtensionStepRuntimeInfo;
 import com.viewfunction.processRepository.extension.ProcessSpaceEventContext;
@@ -82,7 +85,7 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 				processSpaceEventType=ProcessSpaceEventType.PROCESSEXTENSIONSTEP_CANCELED;
 				isForbiddenEventType=false;
 				break;
-			}		
+			}	
 		}
 		
 		if(isForbiddenEventType){
@@ -96,8 +99,39 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 		activitiProcessSpaceEventContextImpl.setProcessSpaceEventType(processSpaceEventType);
 		
 		String executionId=activitiEvent.getExecutionId();
-		String ProcessDefinitionId=activitiEvent.getProcessDefinitionId();
+		String processDefinitionId=activitiEvent.getProcessDefinitionId();
 		String processInstanceId=activitiEvent.getProcessInstanceId();
+		
+		Task currentHandlingTask=null;
+		if(executionId==null){
+			//executionId is null means the operation trigger this event is not executed in a process context,for example create a sub task
+			//so here we need check the real process execution context from other way such as from parent task
+			boolean hasNoExecutionId=true;
+			if(activitiEvent.getType().equals(ActivitiEventType.TASK_CREATED)||activitiEvent.getType().equals(ActivitiEventType.TASK_ASSIGNED)){
+				ActivitiEntityEvent activitiEntityEvent=(ActivitiEntityEvent)activitiEvent;
+				Task currentTask=(Task)activitiEntityEvent.getEntity();
+				
+				currentHandlingTask=currentTask;
+				
+				String parentTaskId=currentTask.getParentTaskId();
+				if(parentTaskId!=null){
+					Task parentTask=activitiEvent.getEngineServices().getTaskService().createTaskQuery().taskId(parentTaskId).singleResult();
+					executionId=parentTask.getExecutionId();
+					processInstanceId=parentTask.getProcessInstanceId();
+					processDefinitionId=parentTask.getProcessDefinitionId();
+					if(executionId!=null){
+						hasNoExecutionId=false;
+					}
+				}
+			}
+			if(hasNoExecutionId){
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
+				System.out.println("Have no executionId for eventType: "+activitiEvent.getType());
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
+				return;
+			}
+		}
+		
 		String processSpaceName=activitiEvent.getEngineServices().getProcessEngineConfiguration().getProcessEngineName();
 		ProcessEngine processEngine=ProcessEngines.getProcessEngine(processSpaceName);
 		HistoricProcessInstanceQuery eventHistoricProcessInstanceQuery=activitiEvent.getEngineServices().getHistoryService().createHistoricProcessInstanceQuery();
@@ -113,7 +147,7 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 					processInstanceFinished=false;
 				}
 			}
-			ProcessObject eventProcessObject=ProcessComponentFactory.createProcessObject(processInstanceId, ProcessDefinitionId,processInstanceFinished);
+			ProcessObject eventProcessObject=ProcessComponentFactory.createProcessObject(processInstanceId, processDefinitionId,processInstanceFinished);
 			((ActivitiProcessObjectImpl)eventProcessObject).setProcessEngine(processEngine);		
 			((ActivitiProcessObjectImpl)eventProcessObject).setProcessStartTime(eventHistoricProcessInstance.getStartTime());
 			((ActivitiProcessObjectImpl)eventProcessObject).setProcessEndTime(eventHistoricProcessInstance.getEndTime());
@@ -133,6 +167,7 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 		System.out.println("--------------------");
 		System.out.println("Execution:");
 		*/
+		
 		Execution currentExecution=activitiEvent.getEngineServices().getRuntimeService().createExecutionQuery().executionId(executionId).singleResult();
 		String activityId=currentExecution.getActivityId();
 		/*
@@ -187,6 +222,17 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 				historicProcessStepList.add(currentHistoricProcessStep);
 			}
 			activitiProcessSpaceEventContextImpl.setEventAttachedProcessSteps(historicProcessStepList);
+		}
+		
+		if(currentHandlingTask!=null){
+			//Current handling task is a new created and assigned sub task,not have process definition,so need add it in additional
+			HistoricProcessStep currentHistoricProcessStep=ProcessComponentFactory.createHistoricProcessStep(
+					currentHandlingTask.getName(),currentHandlingTask.getTaskDefinitionKey(),currentHandlingTask.getId(),
+					processInstanceId,processDefinitionId,
+					currentHandlingTask.getAssignee(),currentHandlingTask.getCreateTime(),null,null,
+					currentHandlingTask.getDescription(),currentHandlingTask.getParentTaskId(),currentHandlingTask.getOwner(),currentHandlingTask.getDueDate());
+			((ActivitiHistoricProcessStepImpl)currentHistoricProcessStep).setProcessEngine(processEngine);	
+			activitiProcessSpaceEventContextImpl.getEventAttachedProcessSteps().add(currentHistoricProcessStep);
 		}
 		
 		/*
@@ -288,10 +334,10 @@ public abstract class ActivitiProcessSpaceEventListenerImpl implements ActivitiE
 				}		
 				activitiProcessSpaceEventContextImpl.setEventAttachedExtensionSteps(extensionStepList);	
 			}
-		}
-		
+		}		
 		
 		executeEventHandleLogic(activitiProcessSpaceEventContextImpl);
+		
 		/*
 		if(activitiEvent.getType().equals(ActivitiEventType.ENGINE_CREATED)){
 			//org.activitiÃ¢â‚¬Â¦Ã¢â‚¬â€¹ActivitiEvent

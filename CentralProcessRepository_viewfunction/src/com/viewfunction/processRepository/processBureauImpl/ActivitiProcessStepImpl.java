@@ -265,6 +265,8 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		if(currentTask==null){
 			throw new ProcessRepositoryRuntimeException();			
 		}
+		String currentAssignee=currentTask.getAssignee();
+		taskService.setOwner(this.stepId, currentAssignee);
 		taskService.setAssignee(this.stepId, null);	
 		return true;
 	}
