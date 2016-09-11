@@ -23,6 +23,7 @@ import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Task;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
@@ -320,10 +321,58 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	}
 
 	@Override
-	public boolean deleteProcessByProcessObjectId(String processObjectId,String deleteReason) {
+	public boolean deleteProcessByProcessObjectId(String processObjectId,String deleteReason) throws ProcessRepositoryRuntimeException{
+		HistoryService historyService = processEngine.getHistoryService();
+		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
+		HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).processInstanceTenantId(this.getProcessSpaceName()).singleResult();
+		if(historicProcessInstance==null){
+			throw new ProcessRepositoryRuntimeException();
+		}		
 		RuntimeService runtimeService = this.processEngine.getRuntimeService();
 		runtimeService.deleteProcessInstance(processObjectId, deleteReason);
 		return true;
+	}
+	
+	@Override
+	public boolean suspendProcessByProcessObjectId(String processObjectId) throws ProcessRepositoryRuntimeException{
+		RuntimeService runtimeService = this.processEngine.getRuntimeService();
+		ProcessInstanceQuery processInstanceQuery=runtimeService.createProcessInstanceQuery();
+		ProcessInstance processInstance=processInstanceQuery.processInstanceId(processObjectId).processInstanceTenantId(this.getProcessSpaceName()).singleResult();
+		if(processInstance==null){
+			throw new ProcessRepositoryRuntimeException();
+		}
+		if(processInstance.isEnded()){
+			//Can only suspend not finished process
+			return false;
+		}else{
+			if(processInstance.isSuspended()){
+				return true;
+			}else{
+				runtimeService.suspendProcessInstanceById(processObjectId);
+				return true;
+			}
+		}
+	}
+	
+	@Override
+	public boolean activateProcessByProcessObjectId(String processObjectId) throws ProcessRepositoryRuntimeException{
+		RuntimeService runtimeService = this.processEngine.getRuntimeService();
+		ProcessInstanceQuery processInstanceQuery=runtimeService.createProcessInstanceQuery();
+		ProcessInstance processInstance=processInstanceQuery.processInstanceId(processObjectId).processInstanceTenantId(this.getProcessSpaceName()).singleResult();
+		if(processInstance==null){
+			throw new ProcessRepositoryRuntimeException();
+		}
+		if(processInstance.isEnded()){
+			//Can only activate not finished process
+			return false;
+		}else{
+			if(!processInstance.isSuspended()){
+				return true;
+			}else{
+				runtimeService.activateProcessInstanceById(processObjectId);
+				return true;
+			}
+		}
 	}
 
 	@Override
@@ -431,5 +480,10 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
 		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
 		return repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
+	}
+
+	@Override
+	public void closeProcessSpace() {
+		this.processEngine.close();
 	}	
 }

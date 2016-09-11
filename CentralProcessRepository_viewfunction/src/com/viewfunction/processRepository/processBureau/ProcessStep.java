@@ -40,7 +40,16 @@ public interface ProcessStep {
 	public boolean saveCurrentStep(String userId) throws ProcessRepositoryRuntimeException;
 	public boolean returnCurrentStep() throws ProcessRepositoryRuntimeException;
 	public boolean reassignCurrentStep(String newUserId) throws ProcessRepositoryRuntimeException;
+	
 	public boolean delegateCurrentStep(String delegateToUserId) throws ProcessRepositoryRuntimeException;
+	public boolean isDelegatedStep() throws ProcessRepositoryRuntimeException;
+	public boolean resolveDelegateJob() throws ProcessRepositoryRuntimeException;
+	public boolean resolveDelegateJob(Map<String, Object> processVariables) throws ProcessRepositoryRuntimeException;
+	
+	public boolean setStepPriority(int priority) throws ProcessRepositoryRuntimeException;
+	public int getStepPriority()throws ProcessRepositoryRuntimeException;
+	
+	public boolean isSuspendedStep() throws ProcessRepositoryRuntimeException;
 	
 	public void addComment(ProcessComment processComment);
 	public List<ProcessComment> getComments();
@@ -51,4 +60,6 @@ public interface ProcessStep {
 	public List<ProcessStep> getChildProcessSteps();
 	public boolean isAllChildProcessStepsFinished();	
 	public ProcessStep getParentProcessStep() throws ProcessRepositoryRuntimeException;	
+	
+	public Integer getProcessDefinitionVersion();
 }

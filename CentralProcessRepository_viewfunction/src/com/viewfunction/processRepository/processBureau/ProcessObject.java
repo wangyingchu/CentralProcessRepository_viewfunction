@@ -7,6 +7,7 @@ public interface ProcessObject {
 	public String getProcessObjectId();
 	public String getProcessDefinitionId();
 	public boolean isFinished();
+	public boolean isSuspended();
 	public List<ProcessStep> getCurrentProcessSteps();
 	public List<HistoricProcessStep> getFinishedProcessSteps();		
 	public List<String> getNextProcessSteps();	
@@ -16,4 +17,5 @@ public interface ProcessObject {
 	public Date getProcessEndTime();
 	public Long getProcessDurationInMillis();
 	public String getProcessStartUserId();
+	public Integer getProcessDefinitionVersion();
 }

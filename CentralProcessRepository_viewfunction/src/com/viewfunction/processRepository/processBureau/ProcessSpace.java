@@ -24,7 +24,9 @@ public interface ProcessSpace {
 	
 	public ProcessObject launchProcess(String processType,String startUserId) throws ProcessRepositoryDeploymentException;
 	public ProcessObject launchProcess(String processType,Map<String,Object> processVariables,String startUserId) throws ProcessRepositoryDeploymentException;	
-	public boolean deleteProcessByProcessObjectId(String processObjectId,String deleteReason);
+	public boolean deleteProcessByProcessObjectId(String processObjectId,String deleteReason)throws ProcessRepositoryRuntimeException;
+	public boolean suspendProcessByProcessObjectId(String processObjectId) throws ProcessRepositoryRuntimeException;
+	public boolean activateProcessByProcessObjectId(String processObjectId) throws ProcessRepositoryRuntimeException;
 	
 	public ProcessObject getProcessObjectById(String processObjectId) throws ProcessRepositoryRuntimeException;
 	public List<ProcessObject> getProcessObjectsByProcessType(String processType,int processStatus) throws ProcessRepositoryRuntimeException;
@@ -41,4 +43,6 @@ public interface ProcessSpace {
 	
 	public InputStream getProcessDefinitionFlowDiagram(String processDefinId);
 	public InputStream getProcessDefinitionFile(String processDefinId);
+	
+	public void closeProcessSpace();
 }

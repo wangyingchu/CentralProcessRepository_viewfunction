@@ -17,6 +17,7 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Comment;
@@ -80,7 +81,42 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 			return isFinished;
 		}			
 	}
-
+	
+	@Override
+	public boolean isSuspended(){
+		if(this.processEngine!=null){
+			RuntimeService runtimeService = this.processEngine.getRuntimeService();		
+			ProcessInstanceQuery _ProcessInstanceQuery=runtimeService.createProcessInstanceQuery();
+			ProcessInstance _ProcessInstance=_ProcessInstanceQuery.processInstanceId(this.processObjectId).singleResult();
+			//after a processInstance is ended,_ProcessInstanceQuery.processInstanceId will return null. ended process can not suspended
+			if(_ProcessInstance==null){
+				return false;
+			}else{
+				return _ProcessInstance.isSuspended();
+			}
+		}else{
+			return false;
+		}
+	}
+	
+	@Override
+	public Integer getProcessDefinitionVersion(){
+		if(this.processEngine!=null){
+			HistoryService historyService = processEngine.getHistoryService();
+			HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
+			HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).singleResult();
+			if(historicProcessInstance==null){
+				return null;
+			}		
+			String processDefinitionId=historicProcessInstance.getProcessDefinitionId();
+			ProcessDefinition _ProcessDefinition=this.processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionId(processDefinitionId).singleResult();
+			int definitionVersion=_ProcessDefinition.getVersion();
+			return definitionVersion;
+		}else{
+			return null;
+		}
+	}
+	
 	@Override
 	public List<ProcessStep> getCurrentProcessSteps() {
 		TaskService taskService = this.processEngine.getTaskService();		
@@ -264,14 +300,14 @@ public class ActivitiProcessObjectImpl implements ProcessObject{
 				String id = activityImpl.getId();
 				if (activitiId.equals(id)){
 					//System.out.println(activityImpl.getProperties());
-					//System.out.println("µ±Ç°ÈÎÎñ£º" + activityImpl.getProperty("name"));
-					// Êä³öÄ³¸ö½ÚµãµÄÄ³ÖÖÊôÐÔ
+					//System.out.println("ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½" + activityImpl.getProperty("name"));
+					// ï¿½ï¿½ï¿½Ä³ï¿½ï¿½ï¿½Úµï¿½ï¿½Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					List<PvmTransition> outTransitions = activityImpl.getOutgoingTransitions();
-					// »ñÈ¡´ÓÄ³¸ö½Úµã³öÀ´µÄËùÓÐÏßÂ·
+					// ï¿½ï¿½È¡ï¿½ï¿½Ä³ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·
 					for (PvmTransition tr : outTransitions) {
 						PvmActivity ac = tr.getDestination();
-						// »ñÈ¡ÏßÂ·µÄÖÕµã½Úµã
-						//System.out.println("ÏÂÒ»²½ÈÎÎñÈÎÎñ£º" + ac.getProperty("name"));
+						// ï¿½ï¿½È¡ï¿½ï¿½Â·ï¿½ï¿½ï¿½Õµï¿½Úµï¿½
+						//System.out.println("ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + ac.getProperty("name"));
 						nextStepList.add(ac.getProperty("name").toString());
 					}
 					break;

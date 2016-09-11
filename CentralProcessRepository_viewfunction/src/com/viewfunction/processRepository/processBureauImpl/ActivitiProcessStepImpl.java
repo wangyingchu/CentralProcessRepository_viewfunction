@@ -8,7 +8,10 @@ import java.util.Map;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
@@ -138,7 +141,6 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 				throw new ProcessRepositoryRuntimeException();
 			}
 		}
-		
 		DelegationState taskDelegateState=currentTask.getDelegationState();
 		if(taskDelegateState!=null){
 			switch(taskDelegateState){
@@ -150,11 +152,10 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 					break;
 			}
 		}
-		
 		taskService.complete(currentTask.getId());		
 		return true;
 	}
-
+	
 	@Override
 	public boolean completeCurrentStep(String userId,Map<String, Object> processVariables)throws ProcessRepositoryRuntimeException {
 		TaskService taskService = this.processEngine.getTaskService();		
@@ -172,7 +173,7 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			switch(taskDelegateState){
 				case PENDING:
 					//resolve task will clear owner and set assignee back to owner
-					taskService.resolveTask(currentTask.getId());
+					taskService.resolveTask(currentTask.getId(),processVariables);
 					break;
 				case RESOLVED:
 					break;
@@ -302,12 +303,123 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		if(currentTask==null){
 			throw new ProcessRepositoryRuntimeException();			
 		}		
-		String newTaskOwner=currentTask.getAssignee();
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					//can't delegate an already delegated step
+					throw new ProcessRepositoryRuntimeException();
+				case RESOLVED:
+					break;
+			}
+		}
 		taskService.delegateTask(this.stepId, newUserId);
-		taskService.setOwner(this.stepId, newTaskOwner);
 		return true;
 	}
 
+	@Override
+	public boolean isDelegatedStep() throws ProcessRepositoryRuntimeException{
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}	
+		boolean currentStepIsDelegated=false;
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					currentStepIsDelegated=true;
+					break;
+				case RESOLVED:
+					break;
+			}
+		}
+		return currentStepIsDelegated;
+	}	
+	
+	@Override
+	public boolean resolveDelegateJob() throws ProcessRepositoryRuntimeException{
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}	
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					//resolve task will clear owner and set assignee back to owner
+					taskService.resolveTask(currentTask.getId());
+					break;
+				case RESOLVED:
+					break;
+			}
+			return true;
+		}else{
+			throw new ProcessRepositoryRuntimeException();
+		}
+	}
+	
+	@Override
+	public boolean resolveDelegateJob(Map<String, Object> processVariables) throws ProcessRepositoryRuntimeException{
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}	
+		DelegationState taskDelegateState=currentTask.getDelegationState();
+		if(taskDelegateState!=null){
+			switch(taskDelegateState){
+				case PENDING:
+					//resolve task will clear owner and set assignee back to owner
+					taskService.resolveTask(currentTask.getId(),processVariables);
+					break;
+				case RESOLVED:
+					break;
+			}
+			return true;
+		}else{
+			throw new ProcessRepositoryRuntimeException();
+		}
+	}
+	
+	@Override
+	public boolean setStepPriority(int priority) throws ProcessRepositoryRuntimeException{
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}	
+		taskService.setPriority(currentTask.getId(), priority);
+		return true;
+	}
+	
+	@Override
+	public int getStepPriority()throws ProcessRepositoryRuntimeException{
+		TaskService taskService = this.processEngine.getTaskService();		
+		Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+		if(currentTask==null){
+			throw new ProcessRepositoryRuntimeException();			
+		}	
+		return currentTask.getPriority();
+	}
+	
+	@Override
+	public boolean isSuspendedStep()throws ProcessRepositoryRuntimeException{
+		if(this.getParentStepId()!=null){
+			//if current step is a sub step,should check it's parent step attached process object's status
+			return this.getParentProcessStep().isSuspendedStep();
+		}else{
+			TaskService taskService = this.processEngine.getTaskService();		
+			Task currentTask=taskService.createTaskQuery().taskId(this.stepId).singleResult();	
+			if(currentTask==null){
+				throw new ProcessRepositoryRuntimeException();			
+			}	
+			return currentTask.isSuspended();
+		}
+	}
+	
 	@Override
 	public ProcessStep createChildProcessStep(String childStepAssignee,String childStepName,String childStepDescription,Date childSteDdueDate) {		
 		TaskService taskService = this.processEngine.getTaskService();
@@ -344,6 +456,7 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 		if(childTask.getDueDate()!=null){
 			childProcessStep.setDueDate(childTask.getDueDate());
 		}			
+		((ActivitiProcessStepImpl)childProcessStep).setProcessEngine(this.processEngine);
 		return childProcessStep;
 	}
 
@@ -413,6 +526,7 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			if(endTime!=null){
 				childProcessStep.setEndTime(endTime);
 			}				
+			((ActivitiProcessStepImpl)childProcessStep).setProcessEngine(this.processEngine);
 			childProcessStepList.add(childProcessStep);		
 		}		
 		return childProcessStepList;
@@ -474,7 +588,6 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			String parentStepId=parentHistoricTask.getParentTaskId();
 			String owner=parentHistoricTask.getOwner();
 			Date dueDate=parentHistoricTask.getDueDate();	
-			
 			ActivitiProcessStepImpl parentProcessStep=new ActivitiProcessStepImpl(stepName,getStepDefinitionKey(),parentProcessStepId,getProcessObjectId(),getProcessDefinitionId(),startTime);			
 			if(parentStepId!=null){
 				parentProcessStep.setParentStepId(parentStepId);
@@ -494,9 +607,28 @@ public class ActivitiProcessStepImpl implements ProcessStep{
 			if(endTime!=null){
 				parentProcessStep.setEndTime(endTime);
 			}				
+			((ActivitiProcessStepImpl)parentProcessStep).setProcessEngine(this.processEngine);
 			return parentProcessStep;			
 		}else{
 			throw new ProcessRepositoryRuntimeException();
 		}		
-	}	
+	}
+	
+	@Override
+	public Integer getProcessDefinitionVersion(){
+		if(this.processEngine!=null){
+			HistoryService historyService = processEngine.getHistoryService();
+			HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery(); 
+			HistoricProcessInstance historicProcessInstance=historicProcessInstanceQuery.processInstanceId(processObjectId).singleResult();
+			if(historicProcessInstance==null){
+				return null;
+			}		
+			String processDefinitionId=historicProcessInstance.getProcessDefinitionId();
+			ProcessDefinition _ProcessDefinition=this.processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionId(processDefinitionId).singleResult();
+			int definitionVersion=_ProcessDefinition.getVersion();
+			return definitionVersion;
+		}else{
+			return null;
+		}
+	}
 }
