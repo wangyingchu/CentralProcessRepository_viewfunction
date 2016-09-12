@@ -70,6 +70,10 @@ public class ProcessComponentFactory {
 		return _ProcessSpace;
 	}
 	
+	public static void shutdownProcessSpaces(){
+		ProcessEngines.destroy();
+	}
+	
 	public static ProcessObject createProcessObject(String processObjectId,String processDefinitionId,boolean isFinished){
 		return new ActivitiProcessObjectImpl(processObjectId,processDefinitionId,isFinished);
 	}

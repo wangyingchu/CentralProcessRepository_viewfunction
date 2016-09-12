@@ -248,7 +248,11 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	public String getProcessNameByDefinitionId(String processDefinId) {
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
 		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionId(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).singleResult();		
-		return processDefinition.getKey();
+		if(processDefinition!=null){
+			return processDefinition.getKey();
+		}else{
+			return null;
+		}
 	}
 
 	@Override
