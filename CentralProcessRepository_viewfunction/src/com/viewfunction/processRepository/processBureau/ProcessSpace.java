@@ -40,9 +40,13 @@ public interface ProcessSpace {
 	public void registerProcessEventListener(ProcessSpaceEventType processEventType,ProcessSpaceEventListener processEventListener);
 	
 	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionName);
+	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionName,int processDefinitionVersion);
 	
 	public InputStream getProcessDefinitionFlowDiagram(String processDefinId);
+	public InputStream getProcessDefinitionFlowDiagram(String processDefinId,int processDefinitionVersion);
+	
 	public InputStream getProcessDefinitionFile(String processDefinId);
+	public InputStream getProcessDefinitionFile(String processDefinId,int processDefinitionVersion);
 	
 	public void closeProcessSpace();
 }

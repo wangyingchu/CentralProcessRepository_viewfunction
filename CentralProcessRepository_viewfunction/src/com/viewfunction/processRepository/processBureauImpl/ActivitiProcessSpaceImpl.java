@@ -480,14 +480,66 @@ public class ActivitiProcessSpaceImpl implements ProcessSpace{
 	}
 
 	@Override
-	public InputStream getProcessDefinitionFile(String processDefinId) {
+	public InputStream getProcessDefinitionFile(String processDefinitionKey) {
 		RepositoryService repositoryService = this.processEngine.getRepositoryService();
-		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinId).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName()).latestVersion().singleResult();
 		return repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
 	}
 
 	@Override
 	public void closeProcessSpace() {
 		this.processEngine.close();
+	}
+
+	@Override
+	public List<ProcessStepDefinition> getProcessStepsInfoByDefinitionName(String processDefinitionKey,int processDefinitionVersion) {
+		List<ProcessStepDefinition> processStepDefinationList=new ArrayList<ProcessStepDefinition>();
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName())
+				.processDefinitionVersion(processDefinitionVersion).singleResult();
+		String lastProcessDefinitionId=processDefinition.getId();
+		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
+		Collection<FlowElement> flowElementCollection=processDefinitionBPMNModel.getMainProcess().getFlowElements();
+		Iterator<FlowElement> iterator=	flowElementCollection.iterator();
+		while(iterator.hasNext()){
+			FlowElement currentElement=iterator.next();
+			String currentElementClassName=currentElement.getClass().getName();
+			if(currentElementClassName.endsWith("UserTask")){
+				ActivitiProcessStepDefinitionImpl currentProcessStepDefinition=new ActivitiProcessStepDefinitionImpl();
+				currentProcessStepDefinition.setStepId(currentElement.getId());
+				currentProcessStepDefinition.setStepName(currentElement.getName());
+				currentProcessStepDefinition.setStepDescription(currentElement.getDocumentation());
+				currentProcessStepDefinition.setStepType(ProcessStepDefinition.StepType_PeopleOperationStep);
+				processStepDefinationList.add(currentProcessStepDefinition);
+			}
+		}
+		return processStepDefinationList;
+	}
+
+	@Override
+	public InputStream getProcessDefinitionFlowDiagram(String processDefinitionKey, int processDefinitionVersion) {
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName())
+				.processDefinitionVersion(processDefinitionVersion).singleResult();
+		String lastProcessDefinitionId=processDefinition.getId();
+		BpmnModel processDefinitionBPMNModel=repositoryService.getBpmnModel(lastProcessDefinitionId);
+		ProcessDiagramGenerator procDiaGenerator = new DefaultProcessDiagramGenerator(); 
+		String diagramFont="宋体";
+		try {
+			diagramFont=PerportyHandler.getPerportyValue(PerportyHandler.ACTIVITI_definitionFlowDiagramFont).trim();
+		} catch (ProcessRepositoryRuntimeException e) {
+			e.printStackTrace();
+		}
+		InputStream is = procDiaGenerator.generateDiagram(  
+				processDefinitionBPMNModel, "png",new ArrayList<String>(),new ArrayList<String>(), diagramFont,diagramFont,null,1);  
+		return is;
+	}
+
+	@Override
+	public InputStream getProcessDefinitionFile(String processDefinitionKey, int processDefinitionVersion) {
+		RepositoryService repositoryService = this.processEngine.getRepositoryService();
+		ProcessDefinition processDefinition=repositoryService.createProcessDefinitionQuery().processDefinitionKey(processDefinitionKey).processDefinitionTenantId(this.getProcessSpaceName())
+				.processDefinitionVersion(processDefinitionVersion).singleResult();
+		return repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
 	}	
 }
